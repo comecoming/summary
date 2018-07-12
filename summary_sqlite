@@ -1,0 +1,10 @@
+.databases             List names and files of attached databases
+.schema ?TABLE?        Show the CREATE statements
+.show                  Show the current values for various settings
+.tables ?TABLE?        List names of tables
+.dump ?TABLE? ...      Dump the database in an SQL text format
+
+CREATE TABLE test (int a, char name);
+CREATE TABLE test (int a DEFAULT 0, char name DEFAULT mary);
+
+
