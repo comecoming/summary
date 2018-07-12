@@ -3,8 +3,11 @@
 .show                  Show the current values for various settings
 .tables ?TABLE?        List names of tables
 .dump ?TABLE? ...      Dump the database in an SQL text format
+.backup ?DB? FILE      Backup DB (default "main") to FILE
+
 
 CREATE TABLE test (int a, char name);
 CREATE TABLE test (int a DEFAULT 0, char name DEFAULT mary);
+CREATE TABLE test2 AS SELECT * FROM test;
 
 
