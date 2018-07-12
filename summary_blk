@@ -1,0 +1,19 @@
+insmod ko
+mkfs
+mount
+cp
+umount
+
+
+major = register_blkdev(major, "blk");
+   dev->queue = blk_init_queue(blk_request, NULL);
+
+dev->gd = alloc_disk(1);
+dev->gd->major = major;
+dev->gd->first_minor = 0;
+dev->gd->fops = &blk_ops;
+dev->gd->queue = dev->queue;
+dev->gd->private_data = dev;
+
+add_disk(dev->gd);
+

@@ -1,0 +1,127 @@
+gcc main.c -lfreetype -I/usr/include/freetype2
+
+<main.c>
+#include <stdio.h>
+#include <ft2build.h>
+
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
+
+int main(int argc, char *argv[])
+{
+
+	int index, error;
+        int width, height, left, top;
+        char *grays;
+
+	FT_Library library;
+	FT_Face face;
+
+	FT_Init_FreeType(&library)
+	FT_New_Face(library, "wqy-microhei.ttc", 0, &face);//face->num_faces, face->num_glyphs
+	FT_Select_Charmap(face, FT_ENCODING_UNICODE)
+	FT_Set_Pixel_Sizes(face, 100, 100);
+
+	unsigned short uni = '`';//utf8_trans_unicode(),transfer to unicode
+
+	index = FT_Get_Char_Index(face, uni);
+	FT_Load_Glyph(face, index, 0);//FT_LOAD_NO_BITMAP
+	
+	if (face->glyph->format != FT_GLYPH_FORMAT_BITMAP)
+		FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);//FT_RENDER_MODE_MONO:black/white
+	
+	
+	width  = face->glyph->bitmap.width;
+	height = face->glyph->bitmap.rows;
+	
+	left   = face->glyph->bitmap_left;
+	top    = face->glyph->bitmap_top;
+	grays  = face->glyph->bitmap.buffer;
+	
+
+	return 0;
+}
+
+<main.c>
+#include <stdio.h>
+#include <ft2build.h>
+
+#include FT_FREETYPE_H
+#include FT_GLYPH_H
+
+int main(int argc, char *argv[])
+{
+
+	int index, error;
+        int width, height, left, top;
+        char *grays;
+        int x, y;
+
+
+	FT_Library library;
+	FT_Face face;
+
+	if (FT_Init_FreeType(&library)) {
+		printf("Failed to intialize freetype library\n");
+		return -1;
+	}
+
+	if (FT_New_Face(library, "wqy-microhei.ttc", 0, &face)) {
+		printf("Failed to load font \n");
+		return -1;
+	}
+printf("face num:%d\n", face->num_faces);
+printf("face glyphs:%d\n", face->num_glyphs);
+
+
+	if (FT_Select_Charmap(face, FT_ENCODING_UNICODE)) {
+		printf("Invalid charmap [%d]\n", FT_ENCODING_UNICODE);
+		return -1;
+	}
+
+	FT_Set_Pixel_Sizes(face, 100, 100);
+
+
+	int idx_inc;
+	unsigned short uni = '`';//utf8_trans_unicode(),transfer to unicode
+
+	index = FT_Get_Char_Index(face, uni);
+	
+	error = FT_Load_Glyph(face, index, 0);
+	if (error)
+	    printf("Failed to load glyph for character\n");
+	
+	if (face->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
+	    error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+	    if (error)
+	        printf("Failed to render glyph for character\n");
+	}
+	
+	
+	width  = face->glyph->bitmap.width;
+	height = face->glyph->bitmap.rows;
+	
+	left   = face->glyph->bitmap_left;
+	top    = face->glyph->bitmap_top;
+	grays  = face->glyph->bitmap.buffer;
+	
+	//printf("width:%d, height:%d, left:%d, top:%d\n", width, height, left, top);
+	//printf("\n\n");
+
+	int i, j;
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width; j++) {
+			if (*(grays+i*width+j)) printf("*");
+			else printf(" ");
+		}
+		printf("\n");
+	}
+
+
+	return 0;
+}
+
+
+
+
+glyph->bitmap_top用法：font_size - top

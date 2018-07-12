@@ -1,0 +1,64 @@
+<test.c>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <termios.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int main()
+{
+        struct termios options;
+
+        int fd = open("/dev/ttyS2", O_RDWR);
+        if (fd < 0) {
+                perror("open uart");
+                return -1;
+        }
+
+        tcflush(fd, TCIOFLUSH);//TCIFLUSH, TCOFLUSH
+        if (tcgetattr(fd, &options) < 0) {
+                perror("tcgetattr");
+                return -1;
+        }
+
+        //4800 8n1
+        cfsetispeed(&options, B4800);//设置输入波特率
+        cfsetospeed(&options, B4800);//设置输出波特率
+        options.c_cflag &= ~CSIZE;//CSIZE=0x30, clean 4,5 bit -> CS5678
+        options.c_cflag |= CS8;
+        options.c_cflag &= ~CSTOPB;//set:2 stop bit, clr:1 stop bit
+        options.c_cflag &= ~PARENB;//parity:PARENB INPCK PARODD
+        options.c_iflag &= ~INPCK;
+
+        //TODO. dont know what for but necessary
+        options.c_oflag &= ~(ONLCR | OCRNL | OPOST);
+        options.c_iflag &= ~(IXON | IXOFF | IXANY | IGNCR | ICRNL | INLCR);
+        options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+
+        options.c_cc[VTIME] = 150;//read timeout
+        options.c_cc[VMIN]  = 0;
+
+        if (tcsetattr(fd, TCSANOW, &options) < 0) {
+                perror("tcsetattr");
+                return -1;
+        }
+
+        tcflush(fd, TCIOFLUSH);//TCIFLUSH, TCOFLUSH
+
+        char buf[] = "123456789";
+        write(fd, buf, 10);
+        //tcdrain(fd);//wait write done
+        memset(buf, 0, 10);
+        read(fd, buf, 10);
+        printf("[%s]\n", buf);
+
+
+
+
+        close(fd);
+
+        return 0;
+}
+

@@ -1,0 +1,155 @@
+<test>
+do_spi_read/do_spi_write()
+{
+	len; tx_buf; rx_buf;
+	write/read();
+	<tsp430.c>
+	wait_event_interruptible(exint_wait, exint_flag);//if read
+	tsp430_txrx_data(spidev, buf, 0/1)//0 write 1 read
+	{
+		send GIO0 pluse;//if write
+		transmit_and_receive(spidev, buf)
+		{
+			__copy_from_user(spi_ioc_transfer, (void __user *)buf, tmp);
+			tsp430_message(spidev, ioc, 1)
+			{
+				spi_message_init(&msg);
+				for() {spi_message_add_tail(spi_transfer, spi_message);}
+				tsp430_sync(spidev, &msg)
+				{
+						message->complete = tsp430_complete;//call after message complete
+						message->context = &done;//complete-call arg
+						spi_async(spidev->spi, message)//<spi.c>
+						{
+							master->transfer(spi, message);//master->transfer = spi_bitbang_transfer
+											//spi_register_master(master)
+						}
+						wait_for_completion(&done);
+				}
+			}
+		}
+	}
+
+
+}
+
+<bitbang>
+int spi_bitbang_start(struct spi_bitbang *bitbang)//setup method, register master, start work queue
+{
+	int	status;
+
+	if (!bitbang->master || !bitbang->chipselect)
+		return -EINVAL;
+
+	INIT_WORK(&bitbang->work, bitbang_work);//queue_work for sending a message
+	spin_lock_init(&bitbang->lock);
+	INIT_LIST_HEAD(&bitbang->queue);//queue for message
+
+	if (!bitbang->master->mode_bits)
+		bitbang->master->mode_bits = SPI_CPOL | SPI_CPHA | bitbang->flags;
+
+	if (!bitbang->master->transfer)
+		bitbang->master->transfer = spi_bitbang_transfer;//message add tail and queue_work
+	if (!bitbang->txrx_bufs) {
+		bitbang->use_dma = 0;
+		bitbang->txrx_bufs = spi_bitbang_bufs;
+		if (!bitbang->master->setup) {
+			if (!bitbang->setup_transfer)
+				bitbang->setup_transfer =
+					 spi_bitbang_setup_transfer;//setup per message
+			bitbang->master->setup = spi_bitbang_setup;
+			bitbang->master->cleanup = spi_bitbang_cleanup;
+		}
+	} else if (!bitbang->master->setup)
+		return -EINVAL;
+
+	/* this task is the only thing to touch the SPI bits */
+	bitbang->busy = 0;
+	bitbang->workqueue = create_singlethread_workqueue(
+			dev_name(bitbang->master->dev.parent));
+	if (bitbang->workqueue == NULL) {
+		status = -EBUSY;
+		goto err1;
+	}
+
+	/* driver may get busy before register() returns, especially
+	 * if someone registered boardinfo for devices
+	 */
+	status = spi_register_master(bitbang->master);
+	if (status < 0)
+		goto err2;
+
+	return status;
+
+}
+
+
+
+
+
+
+
+
+
+<controller driver>//mostly platform driver
+static irqreturn_t txx9spi_interrupt(int irq, void *dev_id)
+{
+	wake_up(&c->waitq);
+	return IRQ_HANDLED;
+}
+
+static irqreturn_t mpc52xx_psc_spi_isr(int irq, void *dev_id)
+{
+	complete(&mps->done);
+	return IRQ_NONE;
+}//wake up rx_data wait event or deal with other irq
+
+static void mpc52xx_psc_spi_work(struct work_struct *work)
+{}//scheduling work to the workqueue
+
+static int mpc52xx_psc_spi_transfer(struct spi_device *spi, struct spi_message *m)
+{
+
+	list_add_tail(&m->queue, &mps->queue);
+	queue_work(mps->workqueue, &mps->work);
+
+	return 0;
+}
+
+
+static int __init atmel_spi_probe(struct platform_device *pdev)
+{
+
+	spi_alloc_master(&pdev->dev, sizeof *as);
+
+	master->mode_bits = SPI_CPOL | SPI_CPHA | SPI_CS_HIGH;
+	master->bus_num = pdev->id;
+	master->num_chipselect = 4;
+	master->setup = atmel_spi_setup;
+	master->transfer = atmel_spi_transfer;
+	master->cleanup = atmel_spi_cleanup;
+
+	platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	request_mem_region(r->start, (r->end - r->start) + 1, dev_name(&pdev->dev));
+	ioremap(r->start, r->end - r->start + 1);
+
+	platform_get_irq(pdev, 0);
+	request_irq(irq, atmel_spi_interrupt, 0, dev_name(&pdev->dev), master);
+
+	spin_lock_init(&mps->lock);//generic lock
+	init_completion(&mps->done);//could use for spi_sync
+	INIT_WORK(&mps->work, mpc52xx_psc_spi_work);
+	INIT_LIST_HEAD(&mps->queue);//queue for message
+
+	create_singlethread_workqueue(dev_name(master->dev.parent));
+
+	ret = spi_register_master(master);
+
+
+	return 0;
+
+}
+
+<controller device>
+
+<device>

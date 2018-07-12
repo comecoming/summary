@@ -1,0 +1,2 @@
+./configure --prefix=/anyka/workspace/usr/ --host=arm-none-linux-gnueabi --with-jthread-includes=/anyka/workspace/usr/include/
+

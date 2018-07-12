@@ -1,0 +1,28 @@
+./qrencode -o summer.png -s 10 --foreground=ffffff --background=11111111 summer_lee
+
+<main.c>
+int main()
+{
+
+        QRcode *qr;     //qr->width
+                        //qr->data
+
+        qr = QRcode_encodeString("www.BAIDU.com", 3, QR_ECLEVEL_H, QR_MODE_8, 1);
+                                //string
+
+        int size = qr->width;
+        int i,j;
+
+        for (i = 0; i < size; i++) {
+                for (j = 0; j < size; j++) {
+                        printf("%c", qr->data[i*size+j]&0x01?'#':' ');//only bit0 of array is useful
+                }
+                printf("\n");
+        }
+
+
+
+        return 0;
+}
+
+

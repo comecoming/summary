@@ -1,0 +1,3 @@
+<user space>
+ioctl(ifd, I2C_SLAVE, 0xa2 >> 1);//actual addr is A2(write)|A3(read), kernel receive 7 bit addr and fill the read/write itself, so addr argument msb must be 0.
+

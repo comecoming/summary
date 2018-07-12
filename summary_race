@@ -1,0 +1,32 @@
+
+DECLARE_MUTEX(name)
+void sema_init(struct semaphore *sem, int val)
+down(struct semaphore *sem)
+up(struct semaphore *sem)
+
+
+DECLARE_COMPLETION(work)
+extern void wait_for_completion(struct completion *);
+extern void complete(struct completion *);
+
+DEFINE_SPINLOCK(x)
+spin_lock_init(lock)
+spin_lock(lock)
+spin_unlock(lock)
+
+DECLARE_WAIT_QUEUE_HEAD(name)
+init_waitqueue_head(q)
+#define wait_event(wq, condition)
+do {
+	if (condition)
+		break;
+	__wait_event(wq, condition);
+} while (0)
+wake_up(x)
+/////////////////
+if (file->f_flags & O_NONBLOCK) {
+	rv = 0;
+} else {
+	rv = wait_event_interruptible(wait, condition));
+}
+

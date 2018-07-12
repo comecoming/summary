@@ -1,0 +1,7 @@
+cd ../linux-2.6.35.4
+cat $path/w55fa92-kernel-2.6.35-$num.patch | patch -p1 -s
+linux-2.6.35.4/build
+conprog(arch/arm/boot/Image) --> NAND1-1
+
+./arch/arm/boot/Makefile:	cp $@   ../image/conprog.bin
+

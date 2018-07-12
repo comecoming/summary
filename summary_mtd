@@ -1,0 +1,91 @@
+int nand_scan_ident(struct mtd_info *mtd, int maxchips)
+int nand_scan_tail(struct mtd_info *mtd)
+int parse_mtd_partitions(struct mtd_info *master, const char **types,
+			 struct mtd_partition **pparts, unsigned long origin)
+int add_mtd_partitions(struct mtd_info *master,
+		       const struct mtd_partition *parts,
+		       int nbparts)
+int add_mtd_device(struct mtd_info *mtd)
+
+
+
+
+
+static int __init atmel_nand_probe(struct platform_device *pdev)
+{
+	/* first scan to find the device and get the page size */
+	if (nand_scan_ident(mtd, 1)) {
+	/* second phase scan */
+	if (nand_scan_tail(mtd)) {
+
+
+#ifdef CONFIG_MTD_CMDLINE_PARTS
+	mtd->name = "atmel_nand";
+	num_partitions = parse_mtd_partitions(mtd, part_probes,
+					      &partitions, 0);
+
+	res = add_mtd_partitions(mtd, partitions, num_partitions);
+#else
+	res = add_mtd_device(mtd);
+#endif
+
+	return res;
+}
+
+
+
+
+
+
+static int __init init_pmc551(void)
+{
+	struct pci_dev *PCI_Device = NULL;
+	struct mypriv *priv;
+	int count, found = 0;
+	struct mtd_info *mtd;
+	u32 length = 0;
+
+	/*
+	 * PCU-bus chipset probe.
+	 */
+	for (count = 0; count < MAX_MTD_DEVICES; count++) {
+
+		if ((PCI_Device = pci_get_device(PCI_VENDOR_ID_V3_SEMI,
+						  PCI_DEVICE_ID_V3_SEMI_V370PDC,
+						  PCI_Device)) == NULL) {
+			break;
+		}
+
+
+		mtd->size = msize;
+		mtd->flags = MTD_CAP_RAM;
+		mtd->erase = pmc551_erase;
+		mtd->read = pmc551_read;
+		mtd->write = pmc551_write;
+		mtd->point = pmc551_point;
+		mtd->unpoint = pmc551_unpoint;
+		mtd->type = MTD_RAM;
+		mtd->name = "PMC551 RAM board";
+		mtd->erasesize = 0x10000;
+		mtd->writesize = 1;
+		mtd->owner = THIS_MODULE;
+
+		if (add_mtd_device(mtd)) {
+			printk(KERN_NOTICE "pmc551: Failed to register new device\n");
+			pci_iounmap(PCI_Device, priv->start);
+			kfree(mtd->priv);
+			kfree(mtd);
+			break;
+		}
+
+
+	}
+
+}
+
+
+
+
+
+
+

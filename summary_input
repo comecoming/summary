@@ -1,0 +1,125 @@
+<mk712.c>
+
+static irqreturn_t mk712_interrupt(int irq, void *dev_id)
+{
+	input_report_key(mk712_dev, BTN_TOUCH, 1);
+	input_report_abs(mk712_dev, ABS_X, last_x);
+	input_report_abs(mk712_dev, ABS_Y, last_y);
+
+	input_sync(mk712_dev);
+	return IRQ_HANDLED;
+}
+
+static int mk712_open(struct input_dev *dev)
+{
+	return 0;
+}
+
+static void mk712_close(struct input_dev *dev)
+{
+
+}
+
+static int __init mk712_init(void)
+{
+
+	mk712_dev = input_allocate_device();
+
+	mk712_dev->name = "ICS MicroClock MK712 TouchScreen";
+	mk712_dev->phys = "isa0260/input0";
+	mk712_dev->id.bustype = BUS_ISA;
+	mk712_dev->id.vendor  = 0x0005;
+	mk712_dev->id.product = 0x0001;
+	mk712_dev->id.version = 0x0100;
+	mk712_dev->open    = mk712_open;
+	mk712_dev->close   = mk712_close;
+
+	mk712_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
+	mk712_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+	input_set_abs_params(mk712_dev, ABS_X, 0, 0xfff, 88, 0);
+	input_set_abs_params(mk712_dev, ABS_Y, 0, 0xfff, 88, 0);
+
+	request_irq(mk712_irq, mk712_interrupt, 0, "mk712", mk712_dev);
+
+	err = input_register_device(mk712_dev);
+
+	return 0;
+
+}
+
+static void __exit mk712_exit(void)
+{
+	input_unregister_device(mk712_dev);
+	free_irq(mk712_irq, mk712_dev);
+}
+
+<pcap_ts.c>
+
+static void pcap_ts_work(struct work_struct *work)
+{
+			input_report_abs(pcap_ts->input, ABS_PRESSURE, 0);
+			input_report_key(pcap_ts->input, BTN_TOUCH, 0);
+
+
+			input_report_abs(pcap_ts->input, ABS_X, pcap_ts->x);
+			input_report_abs(pcap_ts->input, ABS_Y, pcap_ts->y);
+			input_report_key(pcap_ts->input, BTN_TOUCH, 1);
+			input_report_abs(pcap_ts->input, ABS_PRESSURE,
+						pcap_ts->pressure);
+
+		input_sync(pcap_ts->input);
+
+}
+
+static irqreturn_t pcap_ts_event_touch(int pirq, void *data)
+{
+
+		schedule_delayed_work(&pcap_ts->work, 0);
+	return IRQ_HANDLED;
+}
+
+static int pcap_ts_open(struct input_dev *dev)
+{
+
+	schedule_delayed_work(&pcap_ts->work, 0);
+	return 0;
+}
+
+static void pcap_ts_close(struct input_dev *dev)
+{
+	cancel_delayed_work_sync(&pcap_ts->work);
+}
+
+static int __devinit pcap_ts_probe(struct platform_device *pdev)
+{
+
+	input_dev = input_allocate_device();
+
+	INIT_DELAYED_WORK(&pcap_ts->work, pcap_ts_work);
+
+	input_dev->name = "pcap-touchscreen";
+	input_dev->phys = "pcap_ts/input0";
+	input_dev->id.bustype = BUS_HOST;
+	input_dev->id.vendor = 0x0001;
+	input_dev->id.product = 0x0002;
+	input_dev->id.version = 0x0100;
+	input_dev->dev.parent = &pdev->dev;
+	input_dev->open = pcap_ts_open;
+	input_dev->close = pcap_ts_close;
+
+	input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
+	input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+	input_set_abs_params(input_dev, ABS_X, X_AXIS_MIN, X_AXIS_MAX, 0, 0);
+	input_set_abs_params(input_dev, ABS_Y, Y_AXIS_MIN, Y_AXIS_MAX, 0, 0);
+	input_set_abs_params(input_dev, ABS_PRESSURE, PRESSURE_MIN,
+			     PRESSURE_MAX, 0, 0);
+
+	err = input_register_device(pcap_ts->input);
+
+	err = request_irq(pcap_to_irq(pcap_ts->pcap, PCAP_IRQ_TS),
+			pcap_ts_event_touch, 0, "Touch Screen", pcap_ts);
+
+	return 0;
+
+}
+

@@ -1,0 +1,50 @@
+#include <linux/module.h>
+#include <linux/moduleparam.h>
+
+char *word = "adsf";
+module_param(word, charp, 0);
+
+static const struct net_device_ops dm9000_netdev_ops = {
+	.ndo_open		= dm9000_open,
+	.ndo_stop		= dm9000_stop,
+	.ndo_start_xmit		= dm9000_start_xmit,
+	.ndo_tx_timeout		= dm9000_timeout,
+	.ndo_set_multicast_list	= dm9000_hash_table,
+	.ndo_do_ioctl		= dm9000_ioctl,
+	.ndo_change_mtu		= eth_change_mtu,
+	.ndo_validate_addr	= eth_validate_addr,
+	.ndo_set_mac_address	= eth_mac_addr,
+#ifdef CONFIG_NET_POLL_CONTROLLER
+	.ndo_poll_controller	= dm9000_poll_controller,
+#endif
+};
+
+
+static int __init eth_init()
+{
+	struct net_device *ndev;
+
+	ndev = alloc_etherdev(sizeof(struct board_info));
+	ndev->base_addr = (unsigned long)db->io_addr;
+	ndev->irq	= db->irq_res->start;
+	ether_setup(ndev);
+
+	ndev->netdev_ops	= &dm9000_netdev_ops;
+	ndev->watchdog_timeo	= msecs_to_jiffies(watchdog);
+	ndev->ethtool_ops	= &dm9000_ethtool_ops;
+	ret = register_netdev(ndev);
+
+
+	return 0;
+}
+
+static void __exit eth_exit()
+{
+
+}
+
+module_init(eth_init);
+module_exit(eth_exit);
+
+MODULE_LICENSE("GPL");
+

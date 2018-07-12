@@ -1,0 +1,1 @@
+./configure --prefix=/tmp/usr --host=arm-linux LDFLAGS=-L/rk/usr/lib CFLAGS=-I/rk/usr/include

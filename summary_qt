@@ -1,0 +1,10 @@
+MyButton::Mybutton(QWidget *parent) : QPushButton(parent)
+{}
+
+void MyButton::mousePressEvent(QmouseEvent *e)
+{
+//这里处理完后button的clicked信号就不会再被触发
+//要接着调用QPushButton::mousePressEvent(e),原来的clicked信号才会发出
+//如果这时调用e->ignore(),事件并不会传给父类QPushButton,而是继续下传给父组件parent
+//这时可以在父组件用mousePressEvent来捕捉
+}

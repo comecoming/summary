@@ -1,0 +1,19 @@
+//////////nor, jffs2, power on off, main program corrupt, reload main program ok and boot error(below) disappear
+[    1.483342] VFS: Mounted root (ext2 filesystem) on device 1:0.
+[    1.489353] devtmpfs: mounted
+[    1.492535] Freeing init memory: 144K
+------system init---------
+vm.min_free_kbytes = 4096
+[    3.080228] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a65c: 0x1900 instead
+[    3.089127] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a660: 0x0044 instead
+[    3.098089] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a664: 0xfb1d instead
+[    3.107005] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a668: 0x00ac instead
+[    3.115916] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a66c: 0xdc57 instead
+[    3.124826] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a670: 0x81a4 instead
+[    3.133737] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a67c: 0x0045 instead
+[    3.142647] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a680: 0xa845 instead
+[    3.151557] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a684: 0xa845 instead
+[    3.160465] jffs2_scan_eraseblock(): Magic bitmask 0x1985 not found at 0x0058a69c: 0x65f5 instead
+[    3.169342] Further such events for this erase block will not be printed
+
+

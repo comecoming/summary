@@ -1,0 +1,38 @@
+git init    //create .git diretory
+git add [file]
+git commit -m "command"
+
+
+git log
+git reflog
+git reset --hard HEAD^
+git reset --hard HEAD^^
+git reset --hard HEAD~100
+
+git rm
+git checkout -- [file]	//recover a file, only the latest commit can be recovered
+
+
+ssh-keygen -t rsa -b 4096 -C "comecoming@foxmail.com"	// /root/.ssh/id_rsa(private) /root/.ssh/id_rsa.pub(public, copy to github setting)
+
+
+git remote add origin git@github.com:comecoming/test.git	//relate local to remote
+git remote							//check relate
+git remote -v
+git remote rm origin
+git pull --rebase origin master
+git push							//defaultly push master
+git push origin dev						//push dev
+
+git clone git@github.com:comecoming/indoor.git
+
+git branch		//check exit branch
+git branch dev		//create branch
+git checkout dev	//switch to dev
+//git checkout -b dev == git branch dev && git checkout dev
+git merge dev		//merge dev to CURRENT branch
+			//--no-ff merge with no fast foward
+git branch -d dev	//delete branch
+
+
+git log --graph

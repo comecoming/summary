@@ -1,0 +1,23 @@
+vmlinux.lds.S
+bootloader
+TEXT_OFFSET
+MMU = off, D-cache = off, I-cache = dont care, r0 = 0, r1 = machine nr, r2 = atags pointer
+move kernel to right place, set pc to kernel
+<head.S>
+ENTRY(stext)
+	ensure svc mode and irqs disabled
+	get processor id
+		cp15
+	__lookup_processor_type		@ r5=procinfo r9=cpuid
+		cpuid <- bootloader
+		procinfo <- arch/arm/mm/proc-XXX.S(.section ".proc.info.init")
+	__lookup_machine_type		@ r5=machinfo
+		linux/arch/arm/tools/mach-types
+	__vet_atags
+	__create_page_tables
+		mmuflag <- procinfo
+		PHYS_OFFSET <- Kconfig
+		
+
+start_kernel
+

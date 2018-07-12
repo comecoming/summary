@@ -1,0 +1,3 @@
+LDFLAGS=-L/allwinner/workspace/usr/lib/ CFLAGS=-I/allwinner/workspace/usr/include/ ./configure --prefix=/allwinner/workspace/usr/ --host=arm-none-linux-gnueabi --without-xshm --without-xv --with-jpeg --without-imagemagick --without-gtk --without-python --without-qt
+
+

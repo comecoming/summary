@@ -1,0 +1,13 @@
+yum install ImageMagick
+convert test.jpeg test.pgm
+
+aalib-1.2 <- bb-1.2//useless
+aalib-1.4 <- aview-1.3
+
+cd aalib-1.2
+cp /usr/share/libtool/config/config.guess /usr/share/libtool/config/config.sub ./ #x86
+
+
+
+convert -colorspace gray DSC00534.JPG aa.pgm
+aview -driver stdout -width 2984 -height 1176 > /tmp/tmp

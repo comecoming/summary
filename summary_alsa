@@ -1,0 +1,19 @@
+./configure --host=arm-none-linux-gnueabi --prefix=/anyka/workspace/usr/
+
+//driver
+snd_card_create
+snd_device_new
+snd_card_register
+
+
+
+
+snd_pcm_new {snd_device_new}
+snd_ctl_create {snd_device_new}
+snd_rawmidi_new
+snd_timer_new
+snd_card_proc_new
+snd_jack_new
+
+//user
+
