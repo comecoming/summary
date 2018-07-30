@@ -1,0 +1,4 @@
+<test.py>
+#!/usr/bin/python
+print(600+300)
+
