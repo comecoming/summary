@@ -8,6 +8,7 @@ H264的NALU码流有两种，一种是以前导码开头（00000001）开头，以结束码（00000000）结
 
 
 
+
 http://blog.csdn.net/hemmingway/article/details/44193971
 [1] ITU-TRec.H.264/ISO/IEC 14496-10:2005,H.264 Advanced video coding for generic audiovisual services[S].
 [2] 严晓飞. H.264码流结构的分析及其实现的优化[D]. 西安电子科技大学：西安电子科技大学，2007.
