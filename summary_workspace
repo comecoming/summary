@@ -1,0 +1,12 @@
+yum install xinetd
+yum install tftp-server
+service iptables stop
+/etc/sysconfig/iptables
+/etc/sysconfig/selinux
+/etc/selinux/config
+/etc/xinetd.d/tftp
+	server_args -c
+chmod 777 /var/lib/tftpboot
+
+yum install nfs-utils
+/etc/exports
