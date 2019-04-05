@@ -10,3 +10,9 @@ chmod 777 /var/lib/tftpboot
 
 yum install nfs-utils
 /etc/exports
+
+<samba>
+useradd samba
+smbpasswd -a samba
+/etc/samba/smb.conf:	security = share	force user = root
+service smb start
