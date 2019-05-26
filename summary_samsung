@@ -1,0 +1,11 @@
+tar xf arm-linux-gcc-4.5.1-v6-vfp-20120301.tgz
+
+tar xf uboot_tiny4412.tar.bz2
+make tiny4412_config   //(对应的内容可在boards.cfg里查询)
+make 　　//编译完成后u-boot.bin就是所要的文件，　u-boot.bin是把u-boot文件的elf文件信息去除后得来的
+
+
+tar xf dnw-linux.tar.gz
+cd dnw-linux
+make && make install
+
