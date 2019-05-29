@@ -16,3 +16,7 @@ useradd samba
 smbpasswd -a samba
 /etc/samba/smb.conf:	security = share	force user = root
 service smb start
+
+
+yum install ncurses ncurses-devel
+yum install glibc.i686

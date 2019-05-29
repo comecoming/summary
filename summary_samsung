@@ -9,3 +9,7 @@ tar xf dnw-linux.tar.gz
 cd dnw-linux
 make && make install
 
+tar xf busybox-1.22.1.tar.bz2
+cd busybox-1.22.1
+make menuconfig//(arm-none-linux-gnueabi-) Cross Compiler prefix
+make && make install
