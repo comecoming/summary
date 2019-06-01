@@ -1,15 +1,29 @@
+/*gcc*/
 tar xf arm-linux-gcc-4.5.1-v6-vfp-20120301.tgz
+yum install zlib.i686
 
+/*uboot*/
 tar xf uboot_tiny4412.tar.bz2
 make tiny4412_config   //(对应的内容可在boards.cfg里查询)
 make 　　//编译完成后u-boot.bin就是所要的文件，　u-boot.bin是把u-boot文件的elf文件信息去除后得来的
 
-
-tar xf dnw-linux.tar.gz
-cd dnw-linux
-make && make install
-
+/*rootfs*/
 tar xf busybox-1.22.1.tar.bz2
 cd busybox-1.22.1
 make menuconfig//(arm-none-linux-gnueabi-) Cross Compiler prefix
 make && make install
+
+/*kernel*/
+tar xf dnw-linux.tar.gz
+cd dnw-linux
+make && make install
+
+tar xf linux-3.5-tiny4412.tar.bz2
+cd linux-3.5
+cp jk_config .config
+make
+
+dnw 40008000
+dnw zImage
+bootm 40008000
+

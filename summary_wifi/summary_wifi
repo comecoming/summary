@@ -1,3 +1,66 @@
+1.管理帧
+
+有线通信和无线通信的最大区别是什么？那就是有没有用网线！有线客户端如果想连接某个网络，只要将网线接到对应的路由器上就好了，但是无线客户端想完成这个“接入”动作应该怎么办呢？这就需要管理帧的帮忙，管理帧的主要工作就是管理无线客户端的接入和断开。有线连接并不太需要管理帧的帮忙，插拔网线的动作也很简单，但是无线接入却复杂得多。管理帧是不带上层payload信息的，但是它携带一些固定大小的Information felds和可变大小的Information elements （IE）。
+
+管理帧主要包括下面这些种类：
+
+Association request
+Association response
+Reassociation request
+Reassociation response
+Probe request
+Probe response
+Beacon
+Announcement traffic indication message (ATIM)
+Disassociation
+Authentication
+Deauthentication
+Action
+
+
+2.控制帧
+
+有线通信和无线通信另外一个区别是传输媒介的稳定性，无线因为传输媒介是电磁波，容易受到各种干而变得不稳定，为了保证数据的稳定传输，就需要控制帧的帮忙。控制帧不仅可以控制传输的速率，还可以用来清空通道（CTS/RTS），协商channel(DFS/ACS)和提供单播通知(PS-Poll/ACK)等功能。
+
+Power Save Poll (PS-Poll)
+Request to send (RTS)
+Clear to send (CTS) 
+Acknowledgment (ACK)
+Contention Free-End (CF-End)
+CF-End + CF+ACK
+Block ACK Request (BlockAckReq)
+Block ACK (BlockAck)
+
+
+
+3.数据帧
+
+在802.11协议中，大部分数据帧都是通过携带MSDU来传输数据的，当然有一些特殊用途的空帧不会携带MSDU（比如用来通知power save status的帧），所以传输时不会对它进行加密。一般来说，控制帧、管理帧和空的数据帧都是不需要加密的。数据帧的类型主要包括下面这些：
+
+Data (simple data frame)
+Null function (no MSDU payload)
+Data + CF-ACK
+Data + CF-Poll
+Data + CF-ACK + CF-Poll
+CF-ACK (no MSDU payload)
+CF-Poll (no MSDU payload)
+CF-ACK + CF-Poll (no MSDU payload)
+QoS data
+QoS Null (no MSDU payload)
+QoS data + CF-ACK
+QoS data + CF-Poll
+QoS data + CF-ACK + CF-Poll
+QoS CF-Poll (no MSDU payload)
+
+QoS CF-ACK + CF-Poll (no MSDU payload) 
+--------------------- 
+作者：奔跑的路 
+来源：CSDN 
+原文：https://blog.csdn.net/lee244868149/article/details/53239267 
+版权声明：本文为博主原创文章，转载请附上博文链接！
+
+
+
 1.ifconfig wlan0 192.168.1.xxx //update_config
 2.route add default gw 192.168.1.1
 3.vim /etc/resolv.conf
@@ -6,16 +69,16 @@ nameserver 192.168.1.1
 
 <wpa_supplicant>
 wpa_supplicant -d -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
--d ��debug info
--Dwext ��wext��nl80211
--iwlan0 ��wlan0��if name
-/system/bin/wpa_supplicant ��wpa_supplicant path
-/data/misc/wifi/wpa_supplicant.conf ��wpa_supplicant config file path
+-d £ºdebug info
+-Dwext £ºwext£¬nl80211
+-iwlan0 £ºwlan0£¬if name
+/system/bin/wpa_supplicant £ºwpa_supplicant path
+/data/misc/wifi/wpa_supplicant.conf £ºwpa_supplicant config file path
 
 
 <wpa_cli>
 wpa_cli -iwlan0 -p/data/system/wpa_supplicant
-ע��-p/data/system/wpa_supplicant�е�wpa_supplicant�����ǿ�ִ�г��򣬶��Ǹ������׽���
+×¢£¬-p/data/system/wpa_supplicantÖÐµÄwpa_supplicant²¢²»ÊÇ¿ÉÖ´ÐÐ³ÌÐò£¬¶øÊÇ¸ö¿ØÖÆÌ×½Ó×Ö
 
 status	stat	displays the current connection status
 
@@ -53,19 +116,19 @@ eg.0
 	set_network <network id> <key> <parameter> [<parameter>]
 	get_network <network id> <key>
 
-eg.1�������޼��ܵ�AP
+eg.1¡¢Á¬½ÓÎÞ¼ÓÃÜµÄAP
 >add_network  (It will display a network id for you, assume it returns 0)
 >set_network 0 ssid "666"
 >set_network 0 key_mgmt NONE
 >enable_network 0
 >quit
-eg.2������WEP����AP
+eg.2¡¢Á¬½ÓWEP¼ÓÃÜAP
 >add_network   (assume return 1)
 >set_network 1 ssid "666"
 >set_network 1 key_mgmt NONE
 >set_network 1 wep_key0 "your ap password"
 >enable_network 1
-eg.3������WPA-PSK/WPA2-PSK���ܵ�AP
+eg.3¡¢Á¬½ÓWPA-PSK/WPA2-PSK¼ÓÃÜµÄAP
 >add_network   (assume return 2)
 >set_network 2 ssid "666"
 >set_network 2 psk "your pre-shared key"
@@ -95,10 +158,10 @@ network={
     key_mgmt=WPA-PSK  //WPA-PSK = WPA pre-shared key (this requires 'psk' field)
 						//WPA-EAP = WPA using EAP authentication
 						//NONE = WPA is not used; plaintext or static WEP could be used
-    pairwise=CCMP  //CCMP = AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0]  ---����û���������AES���������׶���  
-					//TKIP = Temporal Key Integrity Protocol [IEEE 802.11i/D7.0] ---TKIP �������û��  
-					//NONE = Use only Group Keys (deprecated, should not be included if APs support  pairwise keys)   ---������ƺ�����  
-# If not set, this defaults to: CCMP TKIP  ---�����õĻ���CCMP TKIP��������ȷ����ʵ��Щ·�����޷��Զ�ʶ��ֻ�ܶ�ѡһ���ܿӵ��� 
+    pairwise=CCMP  //CCMP = AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0]  ---¿´µ½Ã»£¬Õâ¸ö¾ÍÊÇAES£¬»»ÁËÂí¼×¶øÒÑ  
+					//TKIP = Temporal Key Integrity Protocol [IEEE 802.11i/D7.0] ---TKIP Õâ¸öµ¹ÊÇÃ»±ä  
+					//NONE = Use only Group Keys (deprecated, should not be included if APs support  pairwise keys)   ---Õâ¸ö¹À¼ÆºÜÉÙÓÃ  
+# If not set, this defaults to: CCMP TKIP  ---²»ÉèÖÃµÄ»°ÊÇCCMP TKIP£¬¿´ËÆÕýÈ·£¬ÆäÊµÓÐÐ©Â·ÓÉÆ÷ÎÞ·¨×Ô¶¯Ê¶±ð£¬Ö»ÄÜ¶þÑ¡Ò»£¬ºÜ¿Óµù¡£ 
     auth_alg=OPEN  
 }  
 
