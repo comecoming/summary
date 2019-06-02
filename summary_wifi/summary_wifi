@@ -61,6 +61,35 @@ QoS CF-ACK + CF-Poll (no MSDU payload)
 
 
 
+
+
+
+
+
+
+
+
+anyka 调试8188eus
+question1
+ATHENA底板上使用8188CUS做AP，其它WIFI设备连接时出现连接后立即断开，或者不断重连，重启开发板依旧；
+WIFI未使用独立电源供电，使用过程中瞬时电流可能达1A，造成不稳定；
+AK MP5板不接电池，只用USB供电时，开机打开WIFI时开发板重启；
+万臣IPC用USB供电，部分板在进行礼帽尖传输时重启；
+
+question2
+8188CUS做AP时，部分苹果设备连接时获取IP失败；
+DHCP服务器不用busybox的udhcpd，更换为dhcpd即可；
+
+question3
+win7连AK的AP设置为家庭网络后，再次连接时需重新识别风络位置；
+DHCP服务器不用busybox的udhcpd，更换为dhcpd即可；
+
+question4
+AP启动后其它设备首次连接失败；
+hostapd所需要的强随机数通过系统中断来产生，系统启动后中断次数不够时则无法产生需要的随机数，导致网络连接失败；
+在hostapd中打开锡耶纳要吃饭选项CONFIG_NO_RANDOM_POOL=y，通过hostapd自身产生随机数；
+
+
 1.ifconfig wlan0 192.168.1.xxx //update_config
 2.route add default gw 192.168.1.1
 3.vim /etc/resolv.conf
