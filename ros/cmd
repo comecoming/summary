@@ -1,0 +1,59 @@
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+sudo apt-get update
+
+sudo apt-get install ros-kinetic-desktop-full
+sudo apt-get install ros-kinetic-desktop
+sudo apt-get install ros-kinetic-ros-base
+sudo apt-get install ros-kinetic-PACKAGE
+e.g.
+sudo apt-get install ros-kinetic-slam-gmapping
+
+sudo rosdep init
+rosdep update
+source /opt/ros/kinetic/setup.bash
+
+
+
+
+
+
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+source devel/setup.bash
+
+workspace_folder/        -- WORKSPACE
+  src/                   -- SOURCE SPACE
+    CMakeLists.txt       -- 'Toplevel' CMake file, provided by catkin
+    package_1/
+      CMakeLists.txt     -- CMakeLists.txt file for package_1
+      package.xml        -- Package manifest for package_1
+    ...
+    package_n/
+      CMakeLists.txt     -- CMakeLists.txt file for package_n
+      package.xml        -- Package manifest for package_n
+
+cd ~/catkin_ws/src
+catkin_create_pkg beginner_tutorials std_msgs rospy roscpp
+
+
+
+sudo apt-get install ros-<distro>-ros-tutorials
+rospack find roscpp
+roscd roscpp
+roscd log
+rosls roscpp_tutorials
+
+
+
+
+rospack find roscpp
+roscd roscpp
+roscd log
+rosls roscpp_tutorials
+
+
+
+
+catkin_create_pkg beginner_tutorials std_msgs rospy roscpp
