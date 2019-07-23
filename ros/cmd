@@ -37,6 +37,8 @@ workspace_folder/        -- WORKSPACE
 cd ~/catkin_ws/src
 catkin_create_pkg beginner_tutorials std_msgs rospy roscpp
 
+cd ~/catkin_ws/
+catkin_make
 
 
 sudo apt-get install ros-<distro>-ros-tutorials
@@ -48,12 +50,77 @@ rosls roscpp_tutorials
 
 
 
-rospack find roscpp
-roscd roscpp
-roscd log
-rosls roscpp_tutorials
+roscore
+rosnode list
+rosnode info /rosout
+
+rosrun turtlesim turtlesim_node
+rosnode ping my_turtle
+
+rosrun turtlesim turtle_teleop_key
 
 
 
 
-catkin_create_pkg beginner_tutorials std_msgs rospy roscpp
+
+
+
+
+$ cd ~/catkin_ws/src/beginner_tutorials
+$ mkdir msg
+$ echo "int64 num" > msg/Num.msg
+
+package.xml
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+CMakeLists.txt
+  find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs message_generation)
+  catkin_package(
+  ...
+  CATKIN_DEPENDS message_runtime ...
+  ...)
+  add_message_files(
+  FILES
+  Num.msg
+)
+  generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
+
+
+
+
+
+$ roscd beginner_tutorials
+$ mkdir srv
+roscp rospy_tutorials AddTwoInts.srv srv/AddTwoInts.srv
+
+CMakeLists.txt
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  message_generation)
+add_service_files(
+  FILES
+  AddTwoInts.srv
+)
+
+
+
+
+
+
+
+
+CMakeLists.txt
+add_executable(talker src/talker.cpp)
+target_link_libraries(talker ${catkin_LIBRARIES})
+add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+
+add_executable(listener src/listener.cpp)
+target_link_libraries(listener ${catkin_LIBRARIES})
+add_dependencies(listener beginner_tutorials_generate_messages_cpp)
