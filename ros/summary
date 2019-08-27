@@ -64,6 +64,16 @@ rosrun turtlesim turtle_teleop_key
 
 
 
+rostopic list
+rostopic type [topic]
+rosmsg show [msg]
+
+rosservice list
+rosservice type [srv]
+rosservice call []
+
+
+
 
 
 $ cd ~/catkin_ws/src/beginner_tutorials
@@ -83,11 +93,11 @@ CMakeLists.txt
   add_message_files(
   FILES
   Num.msg
-)
+  )
   generate_messages(
   DEPENDENCIES
   std_msgs
-)
+  )
 
 
 
