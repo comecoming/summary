@@ -8,6 +8,7 @@ sudo apt-get install ros-kinetic-ros-base
 sudo apt-get install ros-kinetic-PACKAGE
 e.g.
 sudo apt-get install ros-kinetic-slam-gmapping
+apt-cache search ros-kinetic
 
 sudo rosdep init
 rosdep update
