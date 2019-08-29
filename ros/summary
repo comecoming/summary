@@ -52,16 +52,41 @@ rosls roscpp_tutorials
 
 
 roscore
-rosnode list
-rosnode info /rosout
-
 rosrun turtlesim turtlesim_node
-rosnode ping my_turtle
-
 rosrun turtlesim turtle_teleop_key
 
 
+rosnode list #running node
+rosnode info /rosout
+rosnode ping my_turtle
 
+
+########topic#############                    ########service#############
+rostopic list #topic running                  rosservice list #service 
+rosmsg list #topic type all                   rossrv list #service type all
+rostopic type [topic]                         rosservice type [service]
+rosmsg info [msg] #msg format                 rossrv info [srv]
+rosmsg package/packages                       rossrv package/packages
+
+
+Commands:
+  rostopic bw display bandwidth used by topic
+  rostopic delay  display delay of topic from timestamp in header
+  rostopic echo print messages to screen
+  rostopic find find topics by type
+  rostopic hz display publishing rate of topic    
+  rostopic info print information about active topic
+  rostopic list list active topics
+  rostopic pub  publish data to topic
+  rostopic type print topic or field type
+Commands:
+  rosservice args print service arguments
+  rosservice call call the service with the provided args
+  rosservice find find services by service type
+  rosservice info print information about service
+  rosservice list list active services
+  rosservice type print service type
+  rosservice uri  print service ROSRPC uri
 
 
 
@@ -84,11 +109,11 @@ CMakeLists.txt
   add_message_files(
   FILES
   Num.msg
-)
+  )
   generate_messages(
   DEPENDENCIES
   std_msgs
-)
+  )
 
 
 
