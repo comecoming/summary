@@ -1,0 +1,33 @@
+memo
+
+http://10.8.200.163:86
+x64_lib_20190801.tar /opt/x64_lib
+extension_lib_2019827.tar   /opt/ros/extension_lib
+
+/etc/ld.so.conf
+/opt/ros/extension_lib/lib
+/opt/ros/extension_lib/lib64
+
+
+export TURTLEBOT3_MODEL=waffle
+roslaunch turtlebot3_gazebo turtlebot3_simulation.launch
+
+export TURTLEBOT3_MODEL=waffle
+roslaunch turtlebot3_gazebo turtlebot3_world.launch
+
+export TURTLEBOT3_MODEL=waffle
+roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=/opt/ros/catkin_ws_ros/src/turtlebot3/turtlebot3_navigation/maps/map.yaml
+
+
+export ROS_HOSTNAME=localhost
+export ROS_MASTER_URI=http://localhost:11311
+git clone [存储库地址]”命令直接复制源代码
+https://robots.ros.org/
+wiki.ros.org/Sensors
+http://wiki.ros.org/usb_cam
+http://wiki.ros.org/rosserial
+http://wiki.ros.org/rosserial_server
+http://wiki.ros.org/rosserial_client
+rosserial_embeddedlinux 
+
+
