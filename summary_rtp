@@ -1,0 +1,6 @@
+cd jthread
+cmake . -DCMAKE_INSTALL_PREFIX=../usr
+make && make install
+cd jrtplib
+cmake . -DCMAKE_INSTALL_PREFIX=../usr -DJTHREAD_INCLUDE_DIRS=../usr/include/ -DJTHREAD_LIBRARIES=../usr/lib/
+make && make install

@@ -1,0 +1,19 @@
+route
+注意：这个程序已经过时了。请查看ip route
+
+1.添加到主机的路由
+#route add -host 192.168.1.2 dev eth0:0
+#route add -host 10.20.30.148 gw 10.20.30.40
+2.添加到网络的路由
+#route add -net 10.20.30.40 netmask 255.255.255.248 eth0
+#route add -net 10.20.30.48 netmask 255.255.255.248 gw 10.20.30.41
+#route add -net 192.168.1.0/24 eth1
+3.添加默认路由
+#route add default gw 192.168.1.1
+4.删除路由
+#route del -host 192.168.1.2 dev eth0:0
+#route del -host 10.20.30.148 gw 10.20.30.40
+#route del -net 10.20.30.40 netmask 255.255.255.248 eth0
+#route del -net 10.20.30.48 netmask 255.255.255.248 gw 10.20.30.41
+#route del -net 192.168.1.0/24 eth1
+#route del default gw 192.168.1.1 //route del default 删除所有的默认路由
