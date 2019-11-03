@@ -12,7 +12,7 @@ deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted unive
 
 
 cpio -t -F tree.cpio	显示目录结构
-cpio -idmv < xxx.cpio	解压cpio文件
+cpio -idmv < xxx.cpio	解压cpio文件, 没有外层目录
 
 apt-get install linux-source-2.6.32
 cp  ../linux-headers-2.6.32-34-generic/.config  ./.config
