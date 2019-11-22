@@ -18,7 +18,7 @@ static const struct net_device_ops dm9000_netdev_ops = {
 	.ndo_poll_controller	= dm9000_poll_controller,
 #endif
 };
-
+//
 
 static int __init eth_init()
 {

@@ -8,6 +8,7 @@ pci utilities
 PCI标准规定每个设备的配置寄存器组最多可以有256字节的连续空间，其中开头的64字节的用途和格式是标准的，称为配置寄存器的头部。
 
 
+
 pci_bus_type  、pci_bus
 pci_arch_init
 pci_subsys_init
