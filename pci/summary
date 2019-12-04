@@ -12,3 +12,13 @@ PCI标准规定每个设备的配置寄存器组最多可以有256字节的连�
 pci_bus_type  、pci_bus
 pci_arch_init
 pci_subsys_init
+
+
+<8139too.c>
+struct pci_dev
+pci_iomap
+pci_resource_len
+pci_set_master
+pci_request_regions
+pci_enable_device
+http://blog.chinaaet.com/justlxy/p/5100053251
