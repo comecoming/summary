@@ -1,0 +1,10 @@
+supply_id
+device_id
+workstation_id
+add_water
+discharge_water
+charge
+---
+result_code
+supply_id
+supply_status
