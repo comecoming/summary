@@ -1,0 +1,8 @@
+modprobe依赖
+/lib/modules/`uname -r`/modules.dep
+
+ko文件
+/lib/modules/`uname -r`/kernel
+
+kernel源码
+/lib/modules/`uname -r`/build
