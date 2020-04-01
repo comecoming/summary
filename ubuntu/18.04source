@@ -1,0 +1,16 @@
+deb http://cn.archive.ubuntu.com/ubuntu/ boinc main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ boinc-security main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ boinc-updates main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu/ boinc-backports main restricted universe multiverse
+##測試版源
+deb http://cn.archive.ubuntu.com/ubuntu/ boinc-proposed main restricted universe multiverse
+# 源碼
+deb-src http://cn.archive.ubuntu.com/ubuntu/ boinc main restricted universe multiverse
+deb-src http://cn.archive.ubuntu.com/ubuntu/ boinc-security main restricted universe multiverse
+deb-src http://cn.archive.ubuntu.com/ubuntu/ boinc-updates main restricted universe multiverse
+deb-src http://cn.archive.ubuntu.com/ubuntu/ boinc-backports main restricted universe multiverse
+##測試版源
+deb-src http://cn.archive.ubuntu.com/ubuntu/ boinc-proposed main restricted universe multiverse
+# Canonical 合作夥伴和附加
+deb http://archive.canonical.com/ubuntu/ boinc partner
+deb http://extras.ubuntu.com/ubuntu/ boinc main
