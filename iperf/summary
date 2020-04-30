@@ -1,0 +1,101 @@
+ifeq ($(CONFIG_RTL8188E)$(CONFIG_SDIO_HCI),yy)
+
+$(shell cp $(TopDIR)/autoconf_rtl8189e_$(HCI_NAME)_linux.h $(TopDIR)/include/autoconf.h)
+
+LICHEE_JLEVEL=`expr ${cpu_cores} / 2`
+
+if [ ! -d ${LICHEE_BR_DIR} -o ! -d ${LICHEE_TOOLS_DIR} ] ; then
+fi
+-r 可读
+-w 可写
+-x 可执行
+-e 文件存在
+-o 文件属于当前用户
+-z 文件长度为0
+-d 是目录
+-f 是普通文件
+
+
+read -p "Choice: " choice
+
+for chipdir in ./pack/chips/* ; do
+
+basename
+dirname
+
+declare -a mulchips
+chips[$chip_cnt]
+
+for platform in ${platforms[@]}
+
+printf "%4d. %s-%s-%s\n" $board_cnt ${chips[$chip_cnt]} ${platform} ${subbusness}
+
+local board_cnt=0
+((board_cnt+=1))
+
+while true ; do
+	break;
+done
+
+(cd /tmp && echo `pwd`)
+echo `pwd`
+
+while getopts hp:m: OPTION
+do
+	case $OPTION in
+	h) show_help
+	;;
+	p) PLATFORM=1
+	;;
+	m) MODULE=1
+	;;
+	*) show_help
+	;;
+	esac
+done
+
+for f in `/bin/ls ${dir}/[a-z]*.bash 2> /dev/null`; do
+done
+
+for f in `test -d device && find device -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null` \
+         `test -d vendor && find vendor -maxdepth 4 -name 'vendorsetup.sh' 2> /dev/null`
+do
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

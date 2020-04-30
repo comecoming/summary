@@ -6,6 +6,15 @@ LICHEE_JLEVEL=`expr ${cpu_cores} / 2`
 
 if [ ! -d ${LICHEE_BR_DIR} -o ! -d ${LICHEE_TOOLS_DIR} ] ; then
 fi
+-r 可读
+-w 可写
+-x 可执行
+-e 文件存在
+-o 文件属于当前用户
+-z 文件长度为0
+-d 是目录
+-f 是普通文件
+
 
 read -p "Choice: " choice
 
