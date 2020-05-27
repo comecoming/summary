@@ -1,0 +1,6 @@
+ffmpeg -re -i pooh_and_tiger.f4v -an -c copy -f rtp rtp://127.0.0.1:10086
+ffplay -protocol_whitelist "file,udp,rtp" test.sdp
+
+
+
+ffmpeg -h encoder=libx264
