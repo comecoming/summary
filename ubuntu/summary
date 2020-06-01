@@ -6,3 +6,15 @@ ko文件
 
 kernel源码
 /lib/modules/`uname -r`/build
+
+源列表
+https://wiki.ubuntu.org.cn/源列表
+
+list all
+dpkg -l 
+
+list file
+dpkg -L wireshark
+
+status
+dpkg -s wireshare
