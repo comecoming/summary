@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 编译linux kernel及制作initrd ( by quqi99 )
 
 作者：张华  发表于：2013-01-27
@@ -324,3 +325,8 @@ losetup -d /dev/loop0
 ————————————————
 版权声明：本文为CSDN博主「quqi99」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
 原文链接：https://blog.csdn.net/quqi99/article/details/8546687
+=======
+编译linux kernel及制作initrd
+
+https://blog.csdn.net/quqi99/article/details/8546687
+>>>>>>> 995f7219b298f639bbeb4b5e2d42ded3d3978ef8

@@ -1,0 +1,41 @@
+
+deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse
+
+
+cpio -t -F tree.cpio	显示目录结构
+cpio -idmv < xxx.cpio	解压cpio文件, 没有外层目录
+
+apt-get install linux-source-2.6.32
+cp  ../linux-headers-2.6.32-34-generic/.config  ./.config
+libssl-dev
+make modules_install INSTALL_MOD_PATH=/home/luther/gliethttp_dir    默认安装内核模块到 /lib/modules 下
+make install DESTDIR=/home/luther/gliethttp_dir
+
+
+
+
+
+方案目的：
+    高精度导航：实时，有足够资源运行算法
+选型：
+    硬件-i5（基本参数，外部资源）
+    工控盒子 VS TX2
+    系统-linux+rtpatch(MTAI,XEON,WRLINUX,RTTHREAD,UCOS,FREE RTOS)
+    RTLINUX：
+        实现原理
+风险：
+    硬件
+    软件（发行版维护时间），打patch对原生linux的影响，性能限制
+预期效果：
+    能在何种环境下使用，对比其它方案（TX2）优势
+交付指标：
+    使用工具测试，实际环境下测试（测试方法，预期指标）
