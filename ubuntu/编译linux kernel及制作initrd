@@ -1,0 +1,326 @@
+编译linux kernel及制作initrd ( by quqi99 )
+
+作者：张华  发表于：2013-01-27
+版权声明：可以任意转载，转载时请务必以超链接形式标明文章原始出处和作者信息及本版权声明
+( http://blog.csdn.net/quqi99 )
+             
+   运行一个linux系统需要三项内容：
+   1，kernel, 内核，一些核心的代码块，如进程管理，它要求体积很小。
+   2，initrd, 进入系统所需预告加载的硬件驱动module的一个最小集。当GRUB加载kernel时，kernel会在内存中将initrd文件mount到rootfs上激活，然后kernel照着initrd中的init一步一步地加载驱动。在initrd文件中所放入的模块，必须是与操作系统同一版本kernel所编译的模块。init脚本的工作流程是：
+      initrd的参考文档可见：
+      1） Linux initial RAM disk (initrd) overview, http://www.ibm.com/developerworks/linux/library/l-initrd/index.html
+      2)  NTTdocomo-openstack / baremetal-initrd-builder， https://github.com/NTTdocomo-openstack/baremetal-initrd-builder
+      2.1, nash指令（一个文件小，内置了一些实用的指令）
+      2,2 挂载主要的文件系统, 并建立设备文件所需的文件系统
+         mount -t proc /proc /proc
+         mount -t sysfs /sys /sys
+            2.2.1，procfs映射着内存中的一个虚拟目录，用于提供硬件、进程的实时信息，会随时变动。linux为保证稳定性，不允许访问/proc下的文件，root用户也不例外。
+            2.2.2, sysfs也映射着内存中的一个虚拟目录，用于硬件信息的分类, sys目录的每一个文件都只有一个字符为内容来做开关的。
+            2.2.3, tmpfs也映射着内存中的一个虚拟目录，内存中的文件系统。想要速度快时，可以选择在内存建立tmpfs类型的文件系统，因为它都将建在内存中。
+                   例如在内存中建立了一个tmpfs分区并挂载到/mnt/tmpfs目录 ：mount -t tmpfs -o size=50M tmpfs /mnt/tmpfs/
+                        [root@zhanghua proc]# df -h
+                        Filesystem      Size  Used Avail Use% Mounted on
+                        tmpfs            50M     0   50M   0% /mnt/tmpfs
+            2.2.4, /dev/shm，它是tmpfs的一种变种，tmpfs所有的内容所放在内存中，而/dev/shm在内存与文件系统有个映射，硬盘和内存中都会有这内容。
+                  速度快，能存大于内存的文件，但重启之后，内容会消失。
+                  下面显示在/dev/shm中建立文件与在普通ext4文件系统建文件的速度比较：
+                        [root@zhanghua proc]# time dd if=/dev/zero of=/dev/shm/test.file bs=1M count=100
+            100+0 records in
+            100+0 records out
+            104857600 bytes (105 MB) copied, 0.0395221 s, 2.7 GB/s
+
+            real    0m0.075s
+            user    0m0.001s
+            sys    0m0.041s
+            [root@zhanghua proc]# time dd if=/dev/zero of=/bak/test.file bs=1M count=100
+            100+0 records in
+            100+0 records out
+            104857600 bytes (105 MB) copied, 0.0647526 s, 1.6 GB/s
+
+            real    0m0.090s
+            user    0m0.001s
+            sys    0m0.066s
+            2.2.5，devfs, 所有的device都会在/dev目录建立一个对应的设备文件.
+                   缺点是例如即使打印机没连在计算机上，/dev/printer文件也会存在，这样会造成在intrd阶段的设备过多，所以devfs正在被udev所取代
+                   例如要用光驱时，需先在linux与光驱之间通过 mount /dev/cdrom /mnt/命令做关联
+            2.2.6, udev, udev可以放在/sys目录下，不需要将所有未使用的文件建立设备文件，不再需要major number和minor number，当硬件被加载时可执行用户设置的script。
+                   例如，如果/dev/cdrom是被udev建立的，而非devfs，那么当光驱被拨除时，/dev/cdrom文件就会消失。
+            2.2.7，/proc/PID文件，第一个进程都会对应这要闰个文件
+            2.2.8，/proc/partitions用来表示检测到的硬盘信息, major字段表示SCSI controller的slot ID，minor字段表示分区ID。
+                  #[root@zhanghua proc]# cat /proc/partitions  
+           major minor  #blocks  name
+               8        0  488386584 sda
+               8        1   82051956 sda1
+            2.2.9, /sys/block，块设备
+                  ＃[root@zhanghua proc]# cat /sys/block/
+                    loop0/ loop1/  sda/   sr0/
+            2.2.10, /dev/pts ( pseudo terminal slave) 副虚拟终端，其目录的文件都是由ptmx(主虚拟终端）产生的，它们是父子关系。当用ssh联机到localhost本地端之后，就会在
+                   /dev/pts目录下产生一个叫做"0"的文件，当别的console也利用ssh联到这台机器时，就会出现“1“.
+                  [root@zhanghua proc]# ps -ef|grep ssh
+                   hua      11186  3068  0 16:01 pts/0    00:00:00 ssh hua@localhost  
+                   hua      11195 11187  0 16:01 ?        00:00:00 sshd: hua@pts/3
+                   如上，当一个用户以ssh登录之后，该用户就分到一个ptmx所赋予的pts资源（pts/3)，所以说ssh使用的是虚拟终端，不是真正的tty接口。telnet用的则是真正的tty接口。
+            2.2.11, /dev/mapper，如果使用LVM后，linux要和硬盘打交道时不再直接使用/proc/partitions下的硬盘设备，而是使用/dev/mapper下的设备再去中转。
+                    # ls -l /dev/mapper/*
+                      brw-rw---- 1 root disk 253, 0 jan 27 16.16  /dev/mapper/vg0-lv0
+                    # cat /proc/partitions
+                      major minor #blocks name
+                       8     0     17528  sda
+                       253   0     1111   dm-0
+      3，建立最初所需使用的设备文件
+         设备文件使用mknod指令建立，mknod指令用来建立字符(character)或块（block）文件。
+         例：mknod /dev/tty1c41, 建立一个名为tty1的设备文件，c表示是字符文件，major=4, minor=1
+      4，加载相关模块
+      5，切入image所指示的硬盘中实体操作系统. (rescue mode是直接通过kernel加载initrd进入单纯的内存开机的虚拟操作系统)
+         5.1, mkrootdev -t ext4 -o defaults.ro hda1, 即nash指令会将GRUB中所设备的root=xxx中的xxx路径先建立好
+         5.2, mount /sysroot, 将GRUB中的root路径mount到initrd中的/sysroot下。
+         5.3, switchroot这个nash指令将initrd中的/sysroot文件系统切换成/rootfs，从而切换到了硬盘中的文件系统。
+   3，image, 操作系统的image文件系统，当initrd被加载后，必须为用户与文件系统牵线。
+   4, init进程，在切入到用户操作系统之后，首先执行linux的init进程（pid=1), init进程再去加载/etc/rc.d/init.d/functions从而启动服务。
+      关于启动级别与init进程的事儿，也可参见我的另一博文件，Linux的运行级别与解决开机故障一例 ( by quqi99 )， http://blog.csdn.net/quqi99/article/details/7436926
+   5, 系统管理
+      5.1, 查看CPU信息 cat /proc/cpuinfo
+      5.2, 查看内存， cat /proc/meminfo 或者 free -m
+      5.3, 查看usb, lsusb
+      5.4, 查看PCI, lspci
+      5.5, 查看开机日志， dmesg |grep -i error
+
+
+   本文讲的是如何编译kernel，接下来也会研究如何制作initrd与image.
+   最好使用普通用户执行下面所有操作。
+1，下载内核源码
+   git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
+   用git tag查看版本，将并代码切换到v3.8-rc5下， git checkout v3.8-rc5
+2，配置内核(有点类似于./configure), 配置前先安装一个依赖包， sudo yum install ncurses-devel，
+   make menuconfig
+   说明一下，内核的配置项是三选一，yes, no, 或module。yes, no意味着直接将该特性编译或不编译到内核中，module意味着以模块形式编译，模块意味着你开机会可以通modprobe命令动态加载或卸载。
+   我在这里选择的默认配置，生成的配置位于根目录下的.config文件之中。
+   如果你在一个老的配置文件上更改配置的话，可以用make oldconfig命令比较与之前的配置文件的差异来验证你配置的正确性。
+3，执行make命令编译，
+   make
+   说明一下，这条命令实际上已经包括了下面的命令：
+   1）确定依赖性 make dep
+   2)清理编译中间文件，make clean
+   3)编译内核, make bzImage
+   4)生成模块, make modules
+4, 安装模块，下列命令会将模块自动安装到/lib/modules/3.8.0-rc5/目录下.
+   sudo make modules_install
+5, 安装内核及initrd，人工将arch/x86/boot/bzImage的内核文件拷到/boot目录即可。
+   sudo cp arch/x86_64/boot/bzImage /boot/vmlinuz-3.8.0-rc5
+   sudo chmod a+x vmlinuz-3.8.0-rc5
+
+   sudo update-initramfs -u -k version 
+
+  sudo update-grub -o /boot/grub/grub.cfg
+   注意：以vmlinuz-<version>这样命名它。
+
+  上述三步等价于make install， 但make install在自动执行update grub命令时有时候会破坏你的grub文件，特别对于进行PGP加密过的硬盘。
+
+6，「可选」，安装符号表，只有调试时才需要用到。符号表System.map用以将内核符号和它们的起始地址对应起来，调试的时候，如果需要把内存地址翻译成容易理解的函数名和以及变量名，就会很有用。
+
+   sudo cp System.map /boot/System.map-3.8.0-rc5
+7, 建立initrd文件
+   sudo mkinitrd --with=ntfs -o /boot/initrd-linux3.8.0-rc5.img 3.8.0-rc5
+   以上mkinitrd命令是参照现有系统的/etc/modprobe.conf和/etc/fstab文件创建一个全新的initrd, 用--with=ntfs会从/lib/modules/3.8.0-rc5目录将ntfs模块也做到initrd里去。
+
+   那如何要从头开始做一个initrd呢？
+   1) 可以用 sudo zcat initrd-linux3.8.0-rc5.img | cpio -id 命令解压 ( initrd文件是以ext2作为文件系统中，所以可以用mount -o loop initrd.img /mnt命令加载.)
+   2) 然后将模块ntfs.ko加到相应的目录，如lib/modules/3.8.0-rc5/kernel/fs/ntfs目录
+   3) 将ntfs.ko模块加到init脚本
+   4) 重新压缩，find | cpio -co | gzip -9 > initrd-new.img
+
+8, 更新grub, 编译/etc/grub/grub.conf文件，添加下面内容，注意千成不要用update grub命令来更新grub哦，这可能会导致你的双系统无法用。
+   menuentry 'Fedora，Linux 3.8.0' --class fedora --class gnu-linux --class gnu --class os {
+        set root='(hd0,msdos9)'
+        linux   /boot/vmlinuz-3.8.0-rc5 root=/dev/sda10 ro   quiet splash
+        initrd /boot/initrd-linux3.8.0-rc5.img
+   }
+
+   也可以在开机时按e进入grub编辑模式，再按e一次进入kernel的设置界面:
+   grub> root (hd0,msdos9)
+   grub> kernel /boot/vmlinuz-3.8.0-rc5 ro root=/dev/sda9 acpi=off （注意，kernel在前的grub>光标后一定要空一行）
+   grub> initrd /boot/initrd-linux3.8.0-rc5.img
+   grub> boot
+
+
+
+
+
+9, 下面讲一下用于裸机的image的制作过程，需要将虚拟机磁盘系统（raw, qcow2, vhd等）往Linux识别的ext4格式转换。
+
+create raw disk
+
+sudo kvm-img create -f raw /bak/kvmimages/ubuntutemplate.img 8G
+
+install kvm virtual machine
+
+sudo kvm -m 728 -cdrom/bak/kvmimages/ubuntu-11.04-desktop-i386.iso -drivefile=/bak/kvmimages/ubuntutemplate.img -boot d -nographic -vnc :0
+
+use vnc to see: vncviewer192.168.99.100:5900
+
+启动虚机之后安装一些如SSH,cloud-init等软件
+
+sudo apt-get install kvm-pxe
+
+sudo kvm -m 728 -drivefile=/bak/kvmimages/ubuntutemplate .img -boot c -nographic -vnc :0
+
+sudo apt-get install openssh-servercloud-init
+
+sudo rm -rf/etc/udev/rules.d/70-persistent-net.rules #删它，防止添加其他网口
+
+sudo shutdown -h now
+
+调整镜像，　因为openstack只接受ext4文件系统格式，故需将raw格式转化成ext4
+
+root@zhhua:/bak/kvmimages# sudo losetup -f  --show /bak/kvmimages/ubuntucapture.img
+
+root@zhhua:/bak/kvmimages# sudo losetup -a
+
+/dev/loop0: [0809]:5770371(/bak/kvmimages/nova.img)
+
+/dev/loop1: [0809]:5770373(/bak/kvmimages/ubuntucapture .img)
+
+root@zhhua:/bak/kvmimages# sudo fdisk-l /dev/loop1
+
+Disk /dev/loop1: 8589 MB, 8589934592bytes
+
+255 heads, 63 sectors/track, 1044cylinders, total 16777216 sectors
+
+Units = sectors of 1 * 512 = 512 bytes
+
+Sector size (logical/physical): 512bytes / 512 bytes
+
+I/O size (minimum/optimal): 512 bytes/ 512 bytes
+
+Disk identifier: 0x0009d391
+
+Device Boot Start End Blocks Id System
+
+/dev/loop1p1 * 2048 15286271 7642112 83 Linux
+
+/dev/loop1p2 15288318 16775167 743425 5 Extended
+
+/dev/loop1p5 15288320 16775167 743424 82 Linux swap
+
+显示分区是从扇区（sector）2048开始的，每个扇区是512个字节，所以是从2048 x 512 = 1048576个字节开始的。记住这个1048576，下面会用到
+
+卸载loop后重新从1048576字节开始挂载：
+
+sudo losetup -d /dev/loop1
+
+sudo losetup -f -o 1048576 /bak/kvmimages/ubuntucapture.img
+
+
+
+把这整个分区拷贝到一个新文件就是一个我们要的ext4文件系统镜像
+
+sudo dd if=/dev/loop1 of=/bak/kvmimages/ubuntutemplate.img
+
+用完loop后记得卸载,sudo losetup -d /dev/loop1
+
+
+
+挂载刚创建的ext4根文件系统，修改分区加载表（/etc/fstab），注释或删除以前的，加上“LABEL=my-rootfs / ext4 defaults 0 0”一行,
+
+最后，别忘了运行下列命令将块设备的卷标修改成我们上面设置的my-rootfs, sudo tune2fs -L my-rootfs /bak/kvmimages/ubuntutemplate.img:
+
+sudo mount -o loop /bak/kvmimages/ubuntutemplate.img /mnt
+
+sudo vi /mnt/etc/fstab
+
+#UUID=98a4bc39-82a9-4d20-abf8-4aef654c1268 / ext4 errors=remount-ro 0 1
+
+UUID=my-rootfs / ext4 defaults 0 0
+
+# swapwas on /dev/sda5 during installation
+
+UUID=3afdd9f7-7e1e-4172-ae32-7407b0559c51none swap sw 0 0
+
+
+
+
+把内核（vmlinuz）和initrd文件拷贝出来以便后面和虚拟机镜像一起发布到OpenStack云里。使用完虚拟机镜像后记得卸载（unmount）：
+
+sudo cp /mnt/boot/vmlinuz-2.6.38-8-generic /bak/kvmimages/boot/
+
+sudo cp /mnt/boot/initrd.img-2.6.38-8-generic /bak/kvmimages/boot/
+
+sudo umount  /mnt
+
+
+
+整个过程是，initrc或者initramfs都是一个运行在内存的小根文件系统，它有一个叫init的脚本，做完一些准备工作之后，如加载硬件的驱动，然后会切换到镜像所在的新根文件系统上，下面就是一个intramfs中init脚本的例子：
+
+#!/bin/sh
+mount -vt proc proc /proc              #很多工具都读proc的数据，故先加载
+mount -vt sysfs sysfs /sys            #加载内核文件系统
+insmod scsi_mod                         #要切换到镜像的新根文件系统，当然要先加载硬件用的scsi驱动模块
+insmod libata
+insmod ata_piix
+insmod sd_mod
+mdev -s  或者echo /sbin/mdev > /proc/sys/kernel/hotplug   #可以使用busybox的mdev生成动态的udev文件，也可以使用hotplug技术在加载模块的时候再加载相应的设备
+mount /dev/sda /mnt                      #加载硬盘，或者直接加到根目录/中
+exec switch_root /mnt /sbin/init   #通过exec会让镜像中的init进程完全替换initramfs中的init进程的空间来切换根文件分区
+/bin/sh                                              #如果上述切换根文件分区失败，还可以使用initramfs的sh进程，否则会panic
+
+所以说，这个镜像应该是linux内核直接可以认的文件系统格式，如ext4, 直虚机使用的文件格式像raw, qrow2等须像如上方式转换到ext4等格式。这样也就可以直接通过dd命令将镜像拷到/dev/sda硬盘中了(gunzip -c /mnt/sda1/hda.img.gz | dd of=/dev/hda conv=sync,noerror bs=64K)
+
+想把整个硬盘备份到外部存储移动硬盘中的话：
+1，加载移动硬盘，mount -t vfat /dev/sda1 /mnt/sda1
+2，dd备份，dd if=/dev/hda conv=sync,noerror bs=64K | gzip -c  > /mnt/sda1/hda.img.gz
+3, 恢复，gunzip -c /mnt/sda1/hda.img.gz | dd of=/dev/hda conv=sync,noerror bs=64K
+显然, dd的缺点是备份整个硬盘分区，不管它是不是真用了。有个叫再生龙的工具（Clonezilla）就是来克服这个缺点的。下面是它的介绍：
+Clonezilla是一个很好的系统克隆工具,它基于Partimage,吸取了Norton Ghost和Partition Image的优点。即不仅支持对整个系统进行克隆,而且也可以克隆单个的分区,这种灵活性可能更能适应备份者的需要.支持GNU/Linux的文件系统 ext2、ext3、reiserfs、xfs、jfs和Windows的FAT、FAT32、NTFS文件系统.Clonezilla支持使用 PXEBoot来进行Multicast克隆.这对于需要克隆大量系统的用户极为有用. Clonezilla 比起Ghost For Linux(简称G4L)有一个很显著的优势就是Clonezilla支持的文件系统格式比G4L多以外Clonezilla只备份数据,而G4L却将整个分区都备份了(即包含空数据),所以G4L将比Clonezilla占用更多的用于存放备份镜像的空间。
+
+
+
+
+
+或者我们使用另一种方式制作OpenStack镜像（即根文件系统），例如linux-0.2.img是一个采用kvm虚机安装的raw格式的镜像，现在将它转成linux内核认识的ext4格式的根文件系统。
+1, sudo mkdir -p /mnt/{raw,ext4} && sudo mount -o loop linux-0.2.img /mnt/raw
+2, dd if=/dev/zero of=linux-0.2.ext4 bs=1M count=22
+   mkfs.ext4 linux-0.2.ext4
+   sudo mount -o loop linux-0.2.ext4 /mnt/ext4
+3, sudo cp -r /mnt/raw/* /mnt/ext4/
+
+
+
+直接用raw格式的做镜像也是可以的，那样就不需要转换了，glance add name="CentOS-6.4-x86_64" is_public=true container_format=ovf disk_format=raw < CentOS-6.4-x86_64.img
+
+
+
+
+
+最后，现看一下如何挂载raw和qcow2格式的KVM硬盘镜像
+
+raw格式
+对于未分区镜像文件直接使用loop：
+mount -o loop image.img /mnt/image
+已分区的镜像文件：
+如果已知分区的起始位置
+mount -o loop,offset=32256 image.img /mnt/image
+或者使用losetup + kpartx
+losetup /dev/loop0 image.img
+kpartx -a /dev/loop0
+mount /dev/mapper/loop0p1 /mnt/image
+kpartx命令的作用，是让Linux内核读取一个设备上的分区表，然后生成代表相应分区的设备。
+kpartx -l imagefile 可以查看一个映像文件中的分区，使用 kpartx -a imagefile 命令后，就可以通过 /dev/mapper/loop0pX （其中X是 分区号）来访问映像。
+
+qcow2格式
+对于qcow2格式需要使用qemu-nbd这个工具
+modprobe nbd max_part=63
+qemu-nbd -c /dev/nbd0 image.img
+mount /dev/nbd0p1 /mnt/image
+如果是LVM格式的镜像：
+vgscan
+vgchange -ay
+mount /dev/VolGroupName/LogVolName /mnt/image
+最后使用结束需释放资源：
+umount /mnt/image
+vgchange -an VolGroupName
+killall qemu-nbd
+kpartx -d /dev/loop0
+losetup -d /dev/loop0
+————————————————
+版权声明：本文为CSDN博主「quqi99」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/quqi99/article/details/8546687

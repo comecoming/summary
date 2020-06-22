@@ -5,7 +5,7 @@ ko文件
 /lib/modules/`uname -r`/kernel
 
 kernel源码
-/lib/modules/`uname -r`/build
+/lib/modules/`uname -r`/build -> /usr/src/linux-headers-[uname -r]
 
 源列表
 https://wiki.ubuntu.org.cn/源列表
@@ -18,3 +18,23 @@ dpkg -L wireshark
 
 status
 dpkg -s wireshare
+
+linux-source
+linux-headers
+/usr/src/
+
+linux-image
+/boot/vmlinuz-.....
+
+驱动
+/lib/modules/`uname -r`/kernel/
+
+更换内核
+cpio -t -F tree.cpio	显示目录结构
+cpio -idmv < xxx.cpio	解压cpio文件, 没有外层目录
+
+apt-get install linux-source-2.6.32
+cp  ../linux-headers-2.6.32-34-generic/.config  ./.config
+libssl-dev
+make modules_install INSTALL_MOD_PATH=/home/luther/gliethttp_dir    默认安装内核模块到 /lib/modules 下
+make install DESTDIR=/home/luther/gliethttp_dir

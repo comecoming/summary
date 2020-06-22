@@ -1,6 +1,84 @@
 ffmpeg -re -i pooh_and_tiger.f4v -an -c copy -f rtp rtp://127.0.0.1:10086
 ffplay -protocol_whitelist "file,udp,rtp" test.sdp
 
-
-
 ffmpeg -h encoder=libx264
+
+
+
+
+
+
+
+[build]
+cd x264-master;./configure --disable-asm --enable-shared;make;make install
+cd ffmpeg-4.2.2;./configure --disable-yasm --enable-gpl --enable-libx264
+--enable-shared --disable-static//默认装静态库
+
+./configure --list-encoders
+./configure --list-decoders
+./configure --list-muxers
+./configure --list-demuxerss
+./configure --list-protocols
+./configure --help ----->External library support,第三方外部库，除标有[autodetect]的能自动检查，要显式enable编译
+
+
+[ffmpeg]
+ffmpeg -h full
+ffmpeg -buildconf
+ffmpeg -formats
+ffmpeg -muxers
+ffmpeg -codecs
+ffmpeg -encoders
+ffmpeg -protocols
+ffmpeg -filters
+
+ffmpeg -h filter=drmeter
+ffmpeg -h muxer=rtp
+ffmpeg -h encoder=libx264
+
+x264 --full help
+ffmpeg -i input.mp4 -vn -acodec copy output.acc//抽取音频流
+ffmpeg -i input.mp4 -vcodec copy -an output.h264//抽取视频流
+ffmpeg -i input.mp4 -vcodec copy -an -bsf hevc_mp4toannexb -f hevc output.hevc//抽取视频流
+ffmpeg -i input.mp4 -vcodec libx264 -preset ultrafast -b:v 2000k output.mp4
+
+//不同profile
+ffmpeg -i input.mp4 -vcodec libx264 -profile:v baseline -level 3.1 -s 352x288 -an -y -t 10 output_baseline.ts
+ffmpeg -i input.mp4 -vcodec libx264 -profile:v high -level 3.1 -s 352x288 -an -y -t 10 output_high.ts
+
+//控制GOP
+ffmpeg -i input.mp4 -c:v libx264 -g 50 output.mp4
+//控制GOP,去掉切换场景强插的关键帧
+ffmpeg -i input.mp4 -c:v libx264 -g 50 -sc_threshold 0 output.mp4
+
+//录制rtmp推流
+ffmpeg -rtmp_app live -i rtmp://publish.chinaffmpeg.com -c copy -f flv output.flv
+//rtmp推流
+ffmpeg -re -i input.mp4 -c copy -f flv -rtmp_app live rtmp://publish.chinaffmpeg.com
+
+//rtsp拉流
+ffmpeg -rtsp_transport tcp -i rtsp://10.10.100.254/test.ts -c copy -f mp4 output.mp4
+
+
+[ffprobe]
+ffprobe -show_format output.mp4
+ffprobe -show_frames input.flv
+ffprobe -show_packets input.flv
+ffprobe -show_data -show_packets input.flv
+ffprobe -show_streams output.mp4
+
+ffprobe -of xml -show_streams input.flv
+//xml, ini, json, csv(excel), flat
+
+ffprobe -show_frames -select_streams v
+//只看音频a,视频v，字幕s
+
+ffprobe -v quiet -show_frames -select_streams v output_baseline.ts
+
+[ffplay]
+ffplay -showmode 1 output.mp3
+ffplay -debug vis_mb_type output.mp4//宏块显示
+ffplay -vismv pf output.mp4//运动向量显示
+pf，p帧前向 bf，b帧前向 bb，b帧后向
+
+ffplay -flags2 +export_mvs output.mp4 -vf codecview=mv=pf+bf+bb

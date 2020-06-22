@@ -1,0 +1,7 @@
+av_register_all()
+avformat_open_input()
+avcodec_find_decoder()
+avcodec_open2()
+av_read_frame()
+avcodec_send_packet()
+avcodec_receive_frame()
