@@ -6,6 +6,33 @@ ffmpeg -h encoder=libx264
 
 
 
+[hack]
+FFmpeg添加codec的步骤：(以wma为例) 
+1. 在libavcodec/avcodec.h 的CodecID 枚举中添加wma的codec id 比如    
+CODEC_ID_WMAV1 2. 在libavcodec/allcodecs.c的avcodec_register_all()函数中添加wma 解码器的注册比如：    
+REGISTER_ENCDEC(WMAV1, wmav1); 3. 在libavformat/xxx.c文件中添加对于可包含wma数据的文件格式对于wmav1的识别；（此
+处的实现并不唯一，具体可参见ff_codec_wav_tags） 4. 创建wma.c 文件并实现 init, close, decode, flush函数，并定义一个AVCodec 变量，比如： 
+AVCodec wmav1_decoder = { 
+    "wmav1",    //name 
+    AVMEDIA_TYPE_AUDIO, 
+    CODEC_ID_WMAV1, //codec id 
+    sizeof(WMACodecContext), //wma 结构体     wma_decode_init,   // init 函数入口     NULL, 
+    ff_wma_end,   
+ 
+//close 函数入口 
+    wma_decode_superframe,  // decode 函数入口     .flush=flush,  //flush 函数入口 }; 
+ 
+针对目前将wma,aac, mp3等定点解码库替换FFmpeg现有的实现，只需要重新实现init,close,decode,flush函数，实现的具体方法与各个定点解码库现有的实现有关，只要保证对传递的AVCodecContext类型的参数做正确的处理即可。
+————————————————
+通过修改libavcodec/allcodecs.c文件实现，修改如下：
+
+REGISTER_ENCDEC (ASV1,asv1);
+REGISTER_ENCDEC (S3CX264,s3cx264);//添加s3cx264编解码器
+这样，在程序运行时调用 av_register_all(void) 函数后(fang: 新的ffmpeg已经将 codec_list 以全局静态数组的形式存放在 codec_list.c 中,不是运行时动态注册了)，就可以把自定义的编解码器s3cx264添加到FFmpeg存放在内存中的解编码器链中。
+————————————————
+
+
+
 
 
 
@@ -58,6 +85,100 @@ ffmpeg -re -i input.mp4 -c copy -f flv -rtmp_app live rtmp://publish.chinaffmpeg
 
 //rtsp拉流
 ffmpeg -rtsp_transport tcp -i rtsp://10.10.100.254/test.ts -c copy -f mp4 output.mp4
+
+
+
+./ffmpeg -t 10 -f video4linux2 -s 176*144 -r 8 -i /dev/video0 -vcodec h263 -f rtp rtp://192.168.1.105:5060 >
+/tmp/ffmpeg.sdp
+以上命令表示：采集10 秒钟视频，对video4linux2 视频设备进行采集，采集QCIF(176*144)的视频，每秒8 帧，
+视频设备为/dev/video0，视频编码为h263，输出格式为RTP，后面定义了IP 地址及端口，将该码流所对应的SDP
+文件重定向到/tmp/ffmpeg.sdp 中，将此SDP 文件上传到流媒体服务器就可以实现直播了。
+
+
+
+ffmpeg 命令集举例
+1.获取视频的信息
+ffmpeg -i video.avi
+2.将图片序列合成视频
+ffmpeg -f image2 -i image%d.jpg video.mpg
+上面的命令会把当前目录下的图片（名字如：image1.jpg. image2.jpg. 等...）合并成video.mpg
+3.将视频分解成图片序列
+ffmpeg -i video.mpg image%d.jpg
+上面的命令会生成image1.jpg. image2.jpg. ...
+支持的图片格式有：PGM. PPM. PAM. PGMYUV. JPEG. GIF. PNG. TIFF. SGI
+4.为视频重新编码以适合在iPod/iPhone 上播放
+ffmpeg -i source_video.avi input -acodec aac -ab 128kb -vcodec mpeg4 -b 1200kb -mbd 2 -flags +4mv+trell -aic 2
+-cmp 2 -subcmp 2 -s 320x180 -title X final_video.mp4
+说明：
+* 源视频：source_video.avi
+* 音频编码：aac
+* 音频位率：128kb/s
+* 视频编码：mpeg4
+* 视频位率：1200kb/s
+* 视频尺寸：320 X 180
+* 生成的视频：final_video.mp4
+5.为视频重新编码以适合在PSP 上播放
+ffmpeg -i source_video.avi -b 300 -s 320x240 -vcodec xvid -ab 32 -ar 24000 -acodec aac final_video.mp4
+说明：
+* 源视频：source_video.avi
+* 音频编码：aac
+* 音频位率：32kb/s
+* 视频编码：xvid
+* 视频位率：1200kb/s
+* 视频尺寸：320 X 180
+* 生成的视频：final_video.mp4
+6.从视频抽出声音.并存为Mp3
+ffmpeg -i source_video.avi -vn -ar 44100 -ac 2 -ab 192 -f mp3 sound.mp3
+说明：
+* 源视频：source_video.avi
+* 音频位率：192kb/s
+* 输出格式：mp3
+* 生成的声音：sound.mp3
+7.将wav 文件转成Mp3
+ffmpeg -i son_origine.avi -vn -ar 44100 -ac 2 -ab 192 -f mp3 son_final.mp3
+8.将.avi 视频转成.mpg
+ffmpeg -i video_origine.avi video_finale.mpg
+9.将.mpg 转成.avi
+ffmpeg -i video_origine.mpg video_finale.avi
+10.将.avi 转成gif 动画（未压缩）
+ffmpeg -i video_origine.avi gif_anime.gif
+11.合成视频和音频
+ffmpeg -i son.wav -i video_origine.avi video_finale.mpg
+12.将.avi 转成.flv
+ffmpeg -i video_origine.avi -ab 56 -ar 44100 -b 200 -r 15 -s 320x240 -f flv video_finale.flv
+13.将.avi 转成dv
+ffmpeg -i video_origine.avi -s pal -r pal -aspect 4:3 -ar 48000 -ac 2 video_finale.dv
+或者：
+ffmpeg -i video_origine.avi -target pal-dv video_finale.dv
+14.将.avi 压缩成divx
+ffmpeg -i video_origine.avi -s 320x240 -vcodec msmpeg4v2 video_finale.avi
+15.将Ogg Theora 压缩成Mpeg dvd
+ffmpeg -i film_sortie_cinelerra.ogm -s 720x576 -vcodec mpeg2video -acodec mp3 film_terminate.mpg
+16.将.avi 压缩成SVCD mpeg2
+NTSC 格式：
+ffmpeg -i video_origine.avi -target ntsc-svcd video_finale.mpg
+PAL 格式：
+ffmpeg -i video_origine.avi -target pal-svcd video_finale.mpg
+17.将.avi 压缩成VCD mpeg2
+NTSC 格式：
+ffmpeg -i video_origine.avi -target ntsc-vcd video_finale.mpg
+PAL 格式：
+ffmpeg -i video_origine.avi -target pal-vcd video_finale.mpg
+18.多通道编码
+ffmpeg -i fichierentree -pass 2 -passlogfile ffmpeg2pass fichiersortie-2
+19.从flv 提取mp3
+ffmpeg -i source.flv -ab 128k dest.mp3
+
+
+
+
+
+
+
+
+
+
+
 
 
 [ffprobe]
