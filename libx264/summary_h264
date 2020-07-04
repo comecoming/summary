@@ -1,0 +1,17 @@
+H264的NALU码流有两种，一种是以前导码开头（00000001）开头，以结束码（00000000）结尾的的NALU流，这种码流ffmpeg是可以正确的解压。而另一种打包格式的NALU，以一个4字节数开头（这个数是一个大端格式的，数值是该NALU实际负载长度），后面跟NALU负载。
+
+
+
+
+
+
+
+
+
+
+http://blog.csdn.net/hemmingway/article/details/44193971
+[1] ITU-TRec.H.264/ISO/IEC 14496-10:2005,H.264 Advanced video coding for generic audiovisual services[S].
+[2] 严晓飞. H.264码流结构的分析及其实现的优化[D]. 西安电子科技大学：西安电子科技大学，2007.
+[3]RICHARDSONI. H. 2 6 4 andMPEG-4Videocompression [M ].London: JohnW iley& Sons, 2003.
+
+http://xcshen.blog.51cto.com/
