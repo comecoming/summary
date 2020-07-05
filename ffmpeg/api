@@ -5,3 +5,8 @@ avcodec_open2()
 av_read_frame()
 avcodec_send_packet()
 avcodec_receive_frame()
+
+
+<allcodecs.c>
+AVCodec
+
