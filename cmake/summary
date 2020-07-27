@@ -4,3 +4,5 @@ cmake --help-modules-list
 
 find_package()
 ${CMAKE_MODULE_PATH}中的所有目录。如果没有，然后再查看它自己的模块目录/share/cmake-x.y/Modules/
+
+-DCMAKE_INSTALL_PREFIX=../usr
