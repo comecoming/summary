@@ -23,6 +23,10 @@ linux-source
 linux-headers
 /usr/src/
 
+sudo apt-cache showsrc tree
+sudo apt-get source tree
+dpkg-source -x tree-1.5.1.2.dsc
+
 linux-image
 /boot/vmlinuz-.....
 
