@@ -1,0 +1,31 @@
+$(subst <from>,<to>,<text> )
+$(subst ee,EE,feet on the street)
+fEEt on the strEEt
+
+$(patsubst <pattern>,<replacement>,<text> )
+$(patsubst %.c,%.o,x.c.c bar.c)
+x.c.o bar.o
+
+$(dir <names...> )
+$(dir src/foo.c hacks)
+src/ ./
+
+$(notdir <names...> )
+$(notdir src/foo.c hacks)
+foo.c hacks
+
+$(addsuffix <suffix>,<names...> )
+$(addsuffix .c,foo bar)
+foo.c bar.c
+
+$(addprefix <prefix>,<names...> )
+$(addprefix src/,foo bar)
+src/foo src/bar
+
+$(foreach <var>,<list>,<text> )
+names := a b c d
+files := $(foreach n,$(names),$(n).o)
+a.o b.o c.o d.o
+
+contents := $(shell cat foo)
+

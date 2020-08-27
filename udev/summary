@@ -1,0 +1,1 @@
+udevadm info -a -p /sys/class/input/input6/event5
