@@ -1,0 +1,83 @@
+
+systemctl list-unit-files
+systemctl list-unit-files --type=service
+systemctl status gdm.service
+systemctl stop cups.service
+systemctl start cups.service
+systemctl enable cups.service
+
+
+使某服务自动启动	
+systemctl enable httpd.service
+使某服务不自动启动	
+systemctl disable httpd.service
+检查服务状态	
+systemctl status httpd.service （服务详细信息） 
+
+systemctl is-active httpd.service （仅显示是否 Active)
+
+显示所有已启动的服务	
+systemctl list-units --type=service
+启动某服务	
+systemctl start httpd.service
+停止某服务	
+systemctl stop httpd.service
+重启某服务	 	systemctl restart httpd.service
+
+
+
+/////////////////////////////////////////////////
+
+
+systemctl脚本存放在：/usr/lib/systemd/，有系统（system）和用户（user）之分，像需要开机不登陆就能运行的程序，还是存在系统服务里吧，即：/usr/lib/systemd/system目录下
+ 
+每一个服务以.service结尾，一般会分为3部分：[Unit]、[Service]和[Install]
+ 
+ 
+[root@localhost system]# cat ntpdate.service
+[Unit]
+Description=Set time via NTP
+After=syslog.target network.target nss-lookup.target
+Before=time-sync.target
+Wants=time-sync.target
+ 
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/ntpdate-wrapper
+RemainAfterExit=yes
+ 
+[Install]
+WantedBy=multi-user.target
+ 
+ 
+Unit  描述信息
+ 
+Description=     #描述信息
+After=          #在那个程序之前启动
+Before          #在那个程序之后启动
+ 
+Service 启动信息
+ 
+Type=     #启动类型。
+          #Type=oneshot ：这一选项适用于只执行一项任务、随后立即退出的服务。可能需要同时设置 RemainAfterExit=yes 使得 systemd 在服务进程退出之后仍然认为服务处于激活状态。
+          #Type=notify ：与 Type=simple 相同，但约定服务会在就绪后向 systemd 发送一个信号。这一通知的实现由 libsystemd-daemon.so 提供。
+          #Type=dbus ：若以此方式启动，当指定的 BusName 出现在DBus系统总线上时，systemd认为服务就绪。
+          #Type=idle ：systemd会等待所有任务处理完成后，才开始执行 idle 类型的单元。其他行为与 Type=simple 类似。
+          #Type=forking ：systemd认为当该服务进程fork，且父进程退出后服务启动成功。对于常规的守护进程（daemon），除非你确定此启动方式无法满足需求，使用此类型启动即可。使用此启动类型应同时指定 PIDFile=，以便 systemd 能够跟踪服务的主进程。
+          #Type=simple ：（默认值） systemd认为该服务将立即启动。服务进程不会 fork 。如果该服务要启动其他服务，不要使用此类型启动，除非该服务是socket 激活型。
+ 
+RemainAfterExit=yes     #通知systemctl结束
+User=
+Group=
+Restart=               #Restart=always的时候systemctl会不断重启这个脚本，这种适合程序是脚本的。
+                       #Restart=no的时候不会重启，适合程序软件。
+ 
+ 
+ExecStart=  #后面跟程序的绝对路径，如果有启动参数，后面加上，如果程序没有参数不需要添加ExecStop这条语句
+ExecStop=    #后面跟程序的绝对路径，如果有停止参数，后面加上
+PIDFile=     #加上程序PID文件绝对路径
+ 
+ 
+install 安装信息
+ 
+WantedBy=          #WantedBy=multi-user.target（单元被允许运行需要的弱依赖性单元，Wantby从Want列表获得依赖信息。）

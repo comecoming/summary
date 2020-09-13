@@ -1,0 +1,88 @@
+opencpu
+Cat-1,Cat-0,Cat-M1,NB-IoT
+IaaS、PaaS和SaaS
+
+中移物联网开放平台OneNet
+阿里云AIoT
+电信云平台
+华为云，机智云，百度天工
+百度物接入IoT
+QQ物联
+	TencentOS-tiny源码：
+	Github：https://github.com/Tencent/TencentOS-tiny
+	Gitee：https://gitee.com/TencentOS/TencentOS-tiny
+京东微联
+庆科云FogCloud
+Ablecloud
+
+
+奇迹物联作为专注于eSIM方案的物联网公司，推出了基于eSIM技术支持OPEN CPU的NB-IOT模组和4G模组，具体如下：
+
+● AM21E：NB-IOT模组，小尺寸，高集成度，支持GNSS/蓝牙/eSIM
+
+● AM22E：NB-IOT模组，更丰富的硬件接口资源和软件资源
+
+● AM420E：4G模组，更强大的CPU处理能力
+
+● AM430E：CAT1模组，即将开放OPEN
+
+
+
+
+自2016年起，物联网智库每年一度推出《全国物联网产业全景图谱》
+
+全球物联网观察
+
+https://blog.csdn.net/huanzx/article/details/79246804?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522159989103219724836710704%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&request_id=159989103219724836710704&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v3~pc_rank_v2-10-79246804.first_rank_ecpm_v3_pc_rank_v2&utm_term=DTU%E6%A8%A1%E7%BB%84
+
+
+
+https://blog.csdn.net/Alan018/article/details/100054435?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522159989103219724836710704%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&request_id=159989103219724836710704&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v3~pc_rank_v2-21-100054435.first_rank_ecpm_v3_pc_rank_v2&utm_term=DTU%E6%A8%A1%E7%BB%84
+
+
+浅谈工业级4G通信模块适配流程----
+一个做通信模块十多年的老工程师的经验之谈
+
+随着物流网的快速发展，万物互联的时代正在来临，越来越多的场景都需要连网，在很多场景，比如室外，车载等，都需要接入网络，但这些场景都不方便接入网线，这时候就需要选用无线通信方式，采用通信模块，或者USB dongle（无线上网卡），DTU，4G路由器等方式接入网络。
+其中4G通信模组性价比最高，通过直接集成在产品中，不增加产品体积及重量。
+现在我们就谈谈如何把4G模块集成到产品中。
+
+选择通信模块的形态。通信模组一般有2种外形，一种是插卡式的（比如mini PCIe, 和m.2接口的），另外一种是贴片的（一般为LCC或者LGA封装）；我们需要看哪种方式的通信模块最适合自己的产品。这时候需要根据产品内部的结构、空间等来考量。
+根据自己的应用场景，选择模块的制式和种类，比如全网通、五模、移动版、联通版、电信版、单4G版本等，以及模块的规格如工业级、车规级、消费级等。目前各通信模块平台（高通、海思、ASR、中兴微、展讯、MTK等）都有自己的擅长方面；
+根据自己的需求，选择模块的配置，如是否需要语音、是否需要分集接收，是否需要GPS定位等；
+选择拨号方式，看自己的产品需要选用哪种拨号方式，比如PPP拨号，gobinet方式，NDIS等。这样可以一步到位，避免无用功。（我见到过好多客户最开始用PPP拨号，后来又说希望更高的速度，放弃之前的成果，再调试gobinet的）。
+明确自己的产品是否要求模块具备哪些认证；
+以上基本需求确定了，可以根据这些需求选择靠谱的模块供应商。一般尽量选择原厂、以及有技术支持的代理商。一般来说，要从技术支持服务、产品质量、交期、价格等多方面考量。切忌只根据价格选择。
+联系供应商购买样品/开发板，把模块的驱动和开发文档要到，开始调试；
+测试功能，确保功能都完备；
+测试性能，比如高低温、老化测试、可靠性等；
+适配完成。（这里面天线的选型、物联网卡的选择都需要和专业人士沟通，此部分省略）。
+本人在通信模组领域做了十来年，欢迎大家一起交流。QQ:158320966.
+
+
+
+https://me.csdn.net/AmazIOT
+https://me.csdn.net/u011943791
+https://me.csdn.net/hao1__
+https://me.csdn.net/BearPi
+
+
+
+
+
+中移 4G.cat1模组 ML302（基于紫光展锐春藤8910DM）
+广和通LTE Cat 1模组L610
+FIBOCOM_G510
+有方4G模组N720
+上海汉枫电子G43模块
+移远BC95/BC35-G NBIOT模组
+移远4G-CAT1模块EC200S
+移远 M12 GSM模块
+上海合宙科技有限公司的AIR系列
+	http://www.openluat.com/Product/gprs/Air202.html
+NBIOT（BC35、BC26、BC28）
+ML302 opencpu开发环境
+	http://www.mozu.co/do4G-CM2X.html
+中移M5311OpenCPU开发资料
+移远OpenCPU快速开始指导手册
+GPRS模块（SIM800C/SIM900A/SIM868等）
