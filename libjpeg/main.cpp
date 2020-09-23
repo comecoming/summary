@@ -7,18 +7,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "pgm.h"
+#include "jpeglib.h"
+
+
+#define PGM_SIZE 8672*3680
 
 char *pgmfile[] = {
-	"0a6e77bc-bb48-4286-b054-b0ffa0ccc82d.pgm",
-	"0d300776-6deb-44d4-856c-22ef93757e71.pgm",
-	"0de6aa5c-d0e6-4f6c-bf8d-72fb11bb3c73.pgm",
-	"0f3b0da3-2e9b-4920-94f1-2a77a619fab7.pgm",
-	"1a2319b3-4da9-484f-a893-29063e183d93.pgm",
-	"1addb643-735e-4341-966d-0383abfcdb5f.pgm",
-	"1b61d6e6-a45e-466f-aa0f-7d9264d279cb.pgm",
-	"1cdc6b8b-284c-41d7-bb87-f371a8bb97bd.pgm",
-	"1fba0819-2c29-4747-b3db-195c96994817.pgm",
-	"2a4a5c0d-45b4-4150-bfa0-27266a7eb0f9.pgm",
+	"test.pgm",
+	"test.pgm",
+	"test.pgm",
 
 };
 
@@ -26,8 +23,8 @@ int main(int argc, char *argv[])
 {
 	
 	pgm_parse pgm;
-	char *pgm_data;
-	char *jpg_data;
+	unsigned char *pgm_data;
+	unsigned char *jpg_data;
 	char *apenfix;
 	int ret;
 	int pgm_fd;
@@ -36,18 +33,28 @@ int main(int argc, char *argv[])
 	int pgm_size;
 	char target_filename[100];
 	
-	pgm_data = (char *)malloc(1*1000*1000);
-	jpg_data = (char *)malloc(1*1000*1000);
+	pgm_data = (unsigned char *)malloc(PGM_SIZE);
+	jpg_data = (unsigned char *)malloc(1*1000*1000);
+	jpg_size = 1*1000*1000;
 
+	struct pgm_entity pgms;
 	
+
+	//pgm_parse
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+
+
 	int i;
 	for (i = 0; i < sizeof(pgmfile)/sizeof(pgmfile[0]); i++) {
-		pgm_fd = open(pgmfile[i], O_RDONLY);
-		if (pgm_fd < 0) {
-			perror("open");
-			return -1;
-		}
 
+		//get pgm data
+		pgms = pgm.parse(pgmfile[i]);
+
+		//create jpg file
 		memset(target_filename, 0, 100);
 		strcpy(target_filename, pgmfile[i]);
 		apenfix = strstr(target_filename, ".pgm");
@@ -58,11 +65,41 @@ int main(int argc, char *argv[])
 			return -1;
 		}
 
-		pgm_size = read(pgm_fd, pgm_data, 1*1000*1000);
-		printf("pgm size:%d\n", pgm_size);
 
-		jpg_size = 1*1000*1000;//alloc enough mem
-		//pgm.pgm2jpg(pgm_data, &jpg_data, &jpg_size, 50);
+
+
+
+
+	//pgm2jpg
+	JSAMPROW row_pointer[1];  /* pointer to JSAMPLE row[s] */
+	int row_stride; 	  /* physical row width in image buffer */
+
+	jpeg_mem_dest(&cinfo, &jpg_data, &jpg_size);
+	cinfo.image_width = pgms.width;	  /* image width and height, in pixels */
+	cinfo.image_height = pgms.height;
+	cinfo.input_components = 1; 	  /* # of color components per pixel */
+	cinfo.in_color_space = JCS_GRAYSCALE;	  /* colorspace of input image */
+	jpeg_set_defaults(&cinfo);
+	jpeg_set_quality(&cinfo, 50, TRUE /* limit to baseline-JPEG values */);
+	
+	
+	jpeg_start_compress(&cinfo, TRUE);
+	row_stride = pgms.width;   /* JSAMPLEs per row in image_buffer */
+	while (cinfo.next_scanline < cinfo.image_height) {
+	  row_pointer[0] = &pgms.data[cinfo.next_scanline * row_stride];
+	  (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+	
+	jpeg_finish_compress(&cinfo);
+
+
+
+
+
+
+
+
+		//save jpeg file
 		printf("jpg size:%lu\n", jpg_size);
 		ret = write(jpg_fd, jpg_data, jpg_size);
 
@@ -71,8 +108,14 @@ int main(int argc, char *argv[])
 		
 	}
 
-	free(pgm_data);
+
+	//~pgm_parse
+	jpeg_destroy_compress(&cinfo);
+
 	free(jpg_data);
 
 	return 0;
 }
+
+
+

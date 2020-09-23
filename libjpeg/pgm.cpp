@@ -1,53 +1,48 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "pgm.h"
 
 
 pgm_parse::pgm_parse()
 {
-	pgm_fd = -1;
-	raw_data = NULL;
-	raw_data_size = 0;
+	raw_data_size = 320*240;
+	raw_data = (unsigned char *)malloc(320*240);
 
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
-
-	
 }
 
 pgm_parse::~pgm_parse()
 {
-	jpeg_destroy_compress(&cinfo);
+
+	if (raw_data) {
+		free(raw_data);
+		raw_data = NULL;
+	}
 
 }
 
-/*
-pgm_data:原始点数据
-width:
-height:
-quality:压缩质量（0-100）
-
-jpg_data:压缩数据缓存
-jpg_size:压缩数据大小
-*/
-int pgm_parse::pgm2jpg(char *pgm_data, int width, int height, int quality, char **jpg_data, long unsigned int *jpg_size)
+struct pgm_entity pgm_parse::parse(char *file_name)
 {
 	int ret;
+	char buf[100];
+	int data_offset;
 	char *pos;
-	unsigned char* _pos;
-	
-	JSAMPROW row_pointer[1];  /* pointer to JSAMPLE row[s] */
-	int row_stride; 	  /* physical row width in image buffer */
+	char* _pos;
+	struct pgm_entity entity;
+	int pgm_size;
 
-	if (jpg_data == NULL || *jpg_data == NULL || *jpg_size == 0) {
-		printf("no initial buffer\n");
-		return -1;
-	}
-	
-	pos = pgm_data;
+	int fd = open(file_name, O_RDONLY);
 
-	/*while (1) {
+	read(fd, buf, 100);
+	_pos = buf;
+	pos = buf;
+	
+	while (1) {
 		if (*pos != '#')
 			break;
 		pos = strchr(pos, '\n');
@@ -59,7 +54,7 @@ int pgm_parse::pgm2jpg(char *pgm_data, int width, int height, int quality, char 
 		type = TYPE_P2;
 	} else {
 		printf("format not support\n");
-		return -1;
+		return entity;
 	}
 	
 	while (1) {
@@ -68,7 +63,7 @@ int pgm_parse::pgm2jpg(char *pgm_data, int width, int height, int quality, char 
 		if (*pos != '#')
 			break;
 	}
-	sscanf(pos, "%d %d", &pgm_width, &pgm_high);
+	sscanf(pos, "%d %d", &entity.width, &entity.height);
 
 	while (1) {
 		pos = strchr(pos, '\n');
@@ -76,7 +71,7 @@ int pgm_parse::pgm2jpg(char *pgm_data, int width, int height, int quality, char 
 		if (*pos != '#')
 			break;
 	}
-	sscanf(pos, "%d", &max_val);
+	sscanf(pos, "%d", &pgm_size);
 	
 	while (1) {
 		pos = strchr(pos, '\n');
@@ -85,30 +80,23 @@ int pgm_parse::pgm2jpg(char *pgm_data, int width, int height, int quality, char 
 			break;
 	}
 
-	data_offset = pos - pgm_data;*/
+	data_offset = pos - _pos;
 	
-	//printf("%dx%d %d %d\n", pgm_width, pgm_high, max_val, data_offset);
+	printf("%dx%d %d %d\n", entity.width, entity.height, pgm_size, data_offset);
 
-	jpeg_mem_dest(&cinfo, (unsigned char **)jpg_data, jpg_size);
-	cinfo.image_width = width;	  /* image width and height, in pixels */
-	cinfo.image_height = height;
-	cinfo.input_components = 1; 	  /* # of color components per pixel */
-	cinfo.in_color_space = JCS_GRAYSCALE;	  /* colorspace of input image */
-	jpeg_set_defaults(&cinfo);
-	jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
-	
-	
-	jpeg_start_compress(&cinfo, TRUE);
-	row_stride = width;   /* JSAMPLEs per row in image_buffer */
-	_pos = (unsigned char *)pos;
-	while (cinfo.next_scanline < cinfo.image_height) {
-	  row_pointer[0] = &_pos[cinfo.next_scanline * row_stride];
-	  (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	lseek(fd, data_offset, SEEK_SET);
+
+	pgm_size = entity.width*entity.height;
+	if (raw_data_size < pgm_size) {
+		raw_data = (unsigned char *)realloc(raw_data, pgm_size);
+		raw_data_size = pgm_size; 
 	}
-	
-	jpeg_finish_compress(&cinfo);
+	read(fd, raw_data, pgm_size);
+	entity.data = raw_data;
 
-	return 0;
-	
+	close(fd);
+
+	return entity;
 }
+
 

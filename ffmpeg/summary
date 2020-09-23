@@ -36,6 +36,17 @@ REGISTER_ENCDEC (S3CX264,s3cx264);//添加s3cx264编解码器
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 [build]
 cd x264-master;./configure --disable-asm --enable-shared;make;make install
 cd ffmpeg-4.2.2;./configure --disable-yasm --enable-gpl --enable-libx264
@@ -47,6 +58,24 @@ cd ffmpeg-4.2.2;./configure --disable-yasm --enable-gpl --enable-libx264
 ./configure --list-demuxerss
 ./configure --list-protocols
 ./configure --help ----->External library support,第三方外部库，除标有[autodetect]的能自动检查，要显式enable编译
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 [ffmpeg]
@@ -239,6 +268,18 @@ ffmpeg -vcodec mpeg4 -b 1000 -r 10 -g 300 -i ~/test.avi -s 800×600 ~/test-800-6
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 [ffprobe]
 ffprobe -show_format output.mp4
 ffprobe -show_frames input.flv
@@ -253,6 +294,29 @@ ffprobe -show_frames -select_streams v
 //只看音频a,视频v，字幕s
 
 ffprobe -v quiet -show_frames -select_streams v output_baseline.ts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 [ffplay]
 ffplay -showmode 1 output.mp3
