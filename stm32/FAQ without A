@@ -1,0 +1,3 @@
+FAQ without A
+FreeRTOS实验2-1 FreeRTOS移植实验 的工程不须要 void _ttywrch(int x) , 我的工程要加上才能编过
+源码什么都一样，用heap3.c编跑不了，用heap4.c可以

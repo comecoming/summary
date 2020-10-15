@@ -7,7 +7,7 @@ int main()
 {
 	int status;
 	RTPSessionUtils sess;
-	status = sess.CreateDefault(9000, "192.168.6.131", 8000);//local port, dest ip, dest port
+	status = sess.CreateDefault(9000, "192.168.1.100", 8000);//local port, dest ip, dest port
 	if(status)
 	{
 		std::cout << "RTP error:" << RTPGetErrorString(status) << std::endl;

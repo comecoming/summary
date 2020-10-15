@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<cleaning_controller>
+  <id>1100</id>
+  <startup>mcu_controller</startup>
+  <destroy>kill</destroy>
+  <exec_depend>1200</exec_depend>
+  <exec_depend>1300</exec_depend>
+</cleaning_controller>
+<cleaning_management>
+  <id>1100</id>
+  <startup>mcu_controller</startup>
+  <destroy>kill</destroy>
+  <exec_depend>1200</exec_depend>
+  <exec_depend>1300</exec_depend>
+</cleaning_management>
+<mcu_controller>
+  <id>1100</id>
+  <startup>mcu_controller</startup>
+  <destroy>kill</destroy>
+  <exec_depend>1200</exec_depend>
+  <exec_depend>1300</exec_depend>
+</mcu_controller>
+<workstation>
+  <id>1100</id>
+  <startup>mcu_controller</startup>
+  <destroy>kill</destroy>
+  <exec_depend>1200</exec_depend>
+  <exec_depend>1300</exec_depend>
+</workstation>
+</root>
