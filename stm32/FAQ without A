@@ -1,3 +1,27 @@
 FAQ without A
+
 FreeRTOS实验2-1 FreeRTOS移植实验 的工程不须要 void _ttywrch(int x) , 我的工程要加上才能编过
+
 源码什么都一样，用heap3.c编跑不了，用heap4.c可以
+
+void SVC_Handler(void)
+{
+	vPortSVCHandler();
+}
+ 
+void DebugMon_Handler(void)
+{
+}
+ 
+void PendSV_Handler(void)
+{
+	xPortPendSVHandler();
+}
+运行没反应，一定要用
+#define xPortPendSVHandler 	PendSV_Handler
+#define vPortSVCHandler 	SVC_Handler
+才行
+
+
+
+用os_delay编译能运行，用loop_delay只能弹出一个字母p
