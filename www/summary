@@ -1,0 +1,28 @@
+web server:
+apache
+IIS
+nginx
+tomcat
+lighttpd
+
+webserver 基本由这些组成
+
+绑定TCP端口，监听客户端（浏览器）请求
+处理客户端（浏览器）请求
+响应客户端（浏览器）请求
+Web服务器只负责处理HTTP协议，只能发送静态页面的内容。而JSP，ASP，PHP等动态内容需要通过CGI、FastCGI、ISAPI等接口交给其他程序去处理。这个其他程序就是应用服务器。
+比如Web服务器包括Nginx，Apache，IIS等。而应用服务器包括WebLogic，JBoss等。应用服务器一般也支持HTTP协议，因此界限没这么清晰。但是应用服务器的HTTP协议部分仅仅是支持，一般不会做特别优化，所以很少有见Tomcat直接暴露给外面，而是和Nginx、Apache等配合，只让Tomcat处理JSP和Servlet部分
+
+4种主流Python网络框架：Django、Tornado、Flask、Twisted
+
+
+ASP 是什么？
+ASP 指 Active Server Pages （动态服务器页面）
+ASP 是一项微软公司的技术
+ASP 是在 IIS 中运行的程序
+
+ASP 和 HTML 有何不同？
+当浏览器请求某个 HTML 文件时，服务器会返回这个文件
+而当浏览器请求某个 ASP 文件时，IIS 将这个请求传递至 ASP 引擎。ASP 引擎会逐行地读取这个文件，并执行文件中的脚本。最后，ASP 文件将以纯 HTML 的形式返回到浏览器。
+
+

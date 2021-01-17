@@ -1,0 +1,9 @@
+keng
+
+变量定义在中断函数里面，会无端端自已改变
+
+ret = read(echo_fd, &buf+offset, data_len-offset);//char *buf
+
+板子不明原因不能烧录（可能是CUBEIDE的问题），JLINK和STLINK都不行，用ST-LINK utility，先把NRST接地，点连接目标，放开NRST，就能识别出芯片，把FLASH擦干净，就OK
+
+

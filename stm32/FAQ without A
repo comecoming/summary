@@ -25,3 +25,13 @@ void PendSV_Handler(void)
 
 
 用os_delay编译能运行，用loop_delay只能弹出一个字母p
+
+
+Q4：
+//#define configKERNEL_INTERRUPT_PRIORITY 		( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+//#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	191 /* equivalent to 0xb0, or priority 11. */
+#define configKERNEL_INTERRUPT_PRIORITY 		255
+
+用上面那两行报错Error:freertos\portable\RVDS\ARM_CM3\port.c,693
+configASSERT( ( portAIRCR_REG & portPRIORITY_GROUP_MASK ) <= ulMaxPRIGROUPValue );

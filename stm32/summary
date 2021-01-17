@@ -12,3 +12,6 @@ TODO. startup_stm32h743xx.s 启动文件 (初始化堆栈， 初始化PC， 初�
 
 
 -mcpu=cortex-m3 -mthumb --gdwarf-2 -mthumb-interwork --MD *.d -I./RTE/_freeRTOS -IC:/Keil_v5/ARM/PACK/Keil/STM32F1xx_DFP/2.3.0/Device/Include -IC:/Keil_v5/ARM/CMSIS/Include -I"C:/Program Files (x86)/GNU Tools ARM Embedded/5.4 2016q3/arm-none-eabi/include" -o *.o 
+
+
+__ASM ("cpsid i");

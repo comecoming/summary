@@ -1,31 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-<cleaning_controller>
-  <id>1100</id>
-  <startup>mcu_controller</startup>
+<mcu_controller maintainer="hsq">
+  <catkin_ws>/opt/ros/catkin_ws</catkin_ws>
+  <startup>rosrun mcu_controller mcu_controller</startup>
   <destroy>kill</destroy>
-  <exec_depend>1200</exec_depend>
-  <exec_depend>1300</exec_depend>
-</cleaning_controller>
-<cleaning_management>
-  <id>1100</id>
-  <startup>mcu_controller</startup>
-  <destroy>kill</destroy>
-  <exec_depend>1200</exec_depend>
-  <exec_depend>1300</exec_depend>
-</cleaning_management>
-<mcu_controller>
-  <id>1100</id>
-  <startup>mcu_controller</startup>
-  <destroy>kill</destroy>
-  <exec_depend>1200</exec_depend>
-  <exec_depend>1300</exec_depend>
 </mcu_controller>
 <workstation>
-  <id>1100</id>
-  <startup>mcu_controller</startup>
+  <catkin_ws>/opt/ros/catkin_ws</catkin_ws>
+  <startup>rosrun workstation workstation</startup>
   <destroy>kill</destroy>
-  <exec_depend>1200</exec_depend>
-  <exec_depend>1300</exec_depend>
+  <exec_depend>mcu_controller</exec_depend>
 </workstation>
+<cleaning_controller>
+  <catkin_ws>/opt/ros/catkin_ws</catkin_ws>
+  <startup>rosrun cleaning_controller cleaning_controller</startup>
+  <destroy>kill</destroy>
+  <exec_depend>mcu_controller</exec_depend>
+</cleaning_controller>
+<power_management>
+  <catkin_ws>/opt/ros/catkin_ws</catkin_ws>
+  <startup>rosrun power_management power_management</startup>
+  <destroy>kill</destroy>
+  <exec_depend>mcu_controller</exec_depend>
+</power_management>
 </root>
